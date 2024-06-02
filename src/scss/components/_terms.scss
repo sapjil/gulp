@@ -1,0 +1,45 @@
+.terms {
+  background: var(--white);
+  padding: 1rem;
+  .title {
+    font-size: 1rem;
+    color: var(--primary-dark);
+  }
+  &-box {
+    // height: calc(100vh - 175px);
+    // overflow-y: auto;
+    width: 100%;
+    margin: 1rem 0;
+    line-height: 1.75;
+    font-weight: 300;
+    h2,
+    h3,
+    h4 {
+      font-weight: 500;
+      color: var(--body);
+    }
+    p {
+      margin: 0.5rem 0;
+    }
+    ol,
+    ul {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    ol {
+      li {
+        list-style-type: decimal;
+      }
+    }
+    ul {
+      li {
+        list-style-type: disc;
+      }
+    }
+  }
+  &-go {
+    &:disabled {
+      background: var(--g03);
+    }
+  }
+}

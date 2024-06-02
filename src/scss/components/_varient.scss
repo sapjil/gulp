@@ -1,0 +1,39 @@
+:root {
+  --primary: #ff7a00;
+  --gray: #999;
+  --bg: #f3f3f3;
+  --body: #111;
+  --black: #000;
+  --white: #fff;
+  --primary-dark: #3e454f;
+  --primary-light: #6b86ca;
+  --action: #3fa2f7;
+  --action-form: #eb5757;
+  --secondary: #ed4563;
+  --g01: #525252;
+  --g02: #737373;
+  --g03: #999999;
+  --g04: #a3a3a3;
+  --g05: #c4c4c4;
+  --g06: #d4d4d4;
+  --g07: #dddddd;
+  --g08: #ededed;
+  --g09: #f2f2f6;
+  --background: #f2f2f6;
+  --liner: linear-gradient(90deg, #f77062 0%, #fe5196 100%);
+  --liner2: linear-gradient(90deg, #005c97 0%, #363795 100%);
+  --liner3: linear-gradient(180deg, #414566 0%, #6b86ca 100%);
+  --bodypadding: 1rem;
+
+  --font-size-lg: clamp(1.875rem, 4vw, 3.5rem);
+  --font-size-md: clamp(1.125rem, 3vw, 2.5rem);
+  --font-size-sm: clamp(1rem, 2vw, 1.5rem);
+}
+
+@media (min-width: 720px) {
+  :root {
+    --font-size-lg: clamp(1.875rem, 4vw, 3.125rem);
+    --font-size-md: clamp(1.125rem, 3vw, 1.875rem);
+    --font-size-sm: clamp(1rem, 2vw, 1.5rem);
+  }
+}

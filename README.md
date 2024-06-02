@@ -1,0 +1,3 @@
+# update check
+
+npm outdated

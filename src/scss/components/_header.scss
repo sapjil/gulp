@@ -1,0 +1,10 @@
+#header {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  position: fixed;
+  color: var(--white);
+  z-index: 100;
+  width: 100%;
+  // clip-path: polygon();
+}

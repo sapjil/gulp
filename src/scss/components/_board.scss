@@ -1,0 +1,406 @@
+/* 게시판 */
+.board {
+  background: #fff;
+  width: 100%;
+
+  &-box {
+    .title {
+      padding: 0 1rem;
+      color: var(--black);
+      font-size: 1rem;
+    }
+    .heading {
+      padding: 0 1rem;
+    }
+  }
+
+  .board-list {
+    padding: 0 1rem;
+    &_item {
+      width: 100%;
+      margin: 0 auto;
+      border-bottom: 1px solid #eee;
+    }
+    &_link {
+      padding: 0.5rem 0;
+      display: flex;
+      flex-direction: column;
+    }
+    + .title {
+      margin-top: 3rem;
+    }
+  }
+
+  .link-type_arrow {
+    .board-list_item {
+      &:first-child {
+        border-top: 1px solid #eee;
+      }
+    }
+    .board-list_link {
+      position: relative;
+      color: var(--primary);
+      display: block;
+      padding: 0.875rem 0.75rem;
+      &::after {
+        position: absolute;
+        content: '';
+        right: 0.5rem;
+        top: 50%;
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: url(/common/images/icon_arrow_b.svg) no-repeat center center;
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .link-type_default {
+    .board-list_item {
+      border: none;
+    }
+    .board-list_link {
+      position: relative;
+      color: var(--g01);
+      font-size: large;
+      display: block;
+      padding: 0.85rem 0;
+    }
+  }
+
+  .board-item {
+    &_single {
+      &-top {
+        display: flex;
+        justify-content: space-between;
+      }
+      &-bottom {
+        margin-top: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+    &_title {
+      color: var(--primary-dark);
+    }
+    &_pic {
+      max-width: 60px;
+      height: 60px;
+      flex: 1 0 60px;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      margin-left: 1rem;
+      &:empty {
+        flex: 1 0 0;
+        margin-left: 0;
+      }
+      span {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-color: #ccc;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center center;
+      }
+    }
+    &_info {
+      color: var(--g01);
+      font-size: 12px;
+      display: flex;
+      [class^='board-item_'] {
+        &:first-child {
+          margin-left: 0;
+        }
+        &.on {
+          color: var(--g01);
+        }
+        display: flex;
+        align-items: center;
+        margin-left: 0.5rem;
+        color: var(--g05);
+        .icon {
+          margin: 0 0.25rem;
+          background-repeat: no-repeat;
+          background-size: contain;
+          background-position: center center;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+    &_data {
+      color: var(--g03);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+    }
+    &_comment {
+      &.on {
+        .icon {
+          background-image: url('/common/images/icon_comment_on.svg');
+        }
+      }
+      .icon {
+        background-image: url('/common/images/icon_comment_off.svg');
+      }
+    }
+    &_like {
+      &.on {
+        .icon {
+          background-image: url('/common/images/icon_like_on.svg');
+        }
+      }
+      .icon {
+        background-image: url('/common/images/icon_like_off.svg');
+      }
+    }
+  }
+}
+
+.board {
+  &-detail {
+    padding: var(--bodypadding);
+    .detail-heading {
+      color: var(--g03);
+      padding-bottom: 0.5rem;
+      + .list-group {
+        border-top: 1px solid var(--g08);
+        padding: 0.5rem 0;
+        + .detail-content {
+          margin-top: 0;
+        }
+      }
+    }
+    .title {
+      font-size: 1.125rem;
+      color: var(--normal);
+      margin-top: 0;
+    }
+    .board-item_single-bottom {
+      margin-top: 0;
+    }
+    .list-item {
+      box-shadow: none;
+    }
+    .detail-content {
+      border-top: 1px solid var(--g08);
+      padding-top: 0.5rem;
+      .content {
+        padding-bottom: 1rem;
+      }
+      img {
+        border-radius: 16px;
+        overflow: hidden;
+        display: inline-block;
+      }
+      p {
+        // color: var(--primary-dark);
+        color: var(--primary-dark);
+        margin: 0.5rem 0;
+      }
+      .modify {
+        background: var(--g09);
+        margin: 0 -1rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+    .detail-comments {
+      .title {
+        font-size: 1rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--g08);
+        .count {
+          color: var(--g03);
+          margin-left: 0.5rem;
+        }
+      }
+      .no-data {
+        border-bottom: 1px solid var(--g08);
+      }
+    }
+  }
+}
+
+.detail-comments {
+  .comment {
+    &_depth1 {
+      position: relative;
+      padding: 1rem 0;
+      background: var(--white);
+    }
+    &_depth2 {
+      position: relative;
+      margin: 0 -1rem;
+      padding: 1rem 1rem 1rem 2.5rem;
+      z-index: 1;
+      background: var(--g09);
+      .comment_buttons {
+        right: 1rem;
+      }
+      + .comment_depth2 {
+        border-top: 1px solid var(--white);
+      }
+    }
+    border-bottom: 1px solid var(--g08);
+    &_info {
+      margin-bottom: 0.875rem;
+      strong {
+        color: var(--primary-dark);
+        display: block;
+      }
+      small {
+        color: var(--g03);
+      }
+    }
+    &_txt {
+      color: var(--primary-dark);
+      margin-bottom: 0.5rem;
+    }
+    &_utilbox {
+      text-align: right;
+    }
+    &_buttons {
+      position: absolute;
+      // display: flex;
+      right: 0;
+      top: 1rem;
+      height: 2.5rem;
+      &.self {
+        button {
+          width: 4rem;
+        }
+      }
+      button {
+        width: 5rem;
+        line-height: 1;
+        + button {
+          margin-left: 0.25rem;
+        }
+      }
+    }
+    &-single_like {
+      font-size: 0.875rem;
+      background-color: transparent;
+      appearance: none;
+      padding: 0;
+      margin: 0;
+      width: auto;
+      color: var(--g01);
+      .count {
+        color: var(--g05);
+        &.on {
+          color: var(--secondary);
+        }
+      }
+    }
+  }
+}
+
+.board-write {
+  display: block;
+  .detail-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .title {
+      margin-bottom: 0;
+    }
+    .button {
+      width: 6.5rem;
+    }
+  }
+  .detail-content {
+    padding-top: 0;
+    border: none;
+  }
+  .list-utility {
+    margin: 0;
+    padding: 0 0 0.5rem;
+    border-bottom: 0;
+  }
+  select {
+    // padding: 0.5rem;
+    appearance: none;
+  }
+  input {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    box-sizing: border-box;
+  }
+  .buttons-half {
+    margin-top: 1.5rem;
+  }
+  .list-group {
+    margin-bottom: 0.5rem;
+    border-top: 1px solid var(--g08);
+    border-bottom: 1px solid var(--g08);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+.faq-box {
+  font-size: 1rem;
+  color: var(--normal);
+  padding: 1rem 1rem 1rem 2rem;
+  p {
+    padding: 0.5rem 0;
+  }
+}
+
+.board-insertFlight {
+  .list-item {
+    box-shadow: unset;
+    .list-item-outer {
+      .list-item {
+        border: 1px solid var(--g07);
+      }
+    }
+  }
+}
+
+.board-comment-box {
+  display: block;
+  .comment_utility {
+    width: 100%;
+    margin: 0.5rem 0;
+    // display: flex;
+    // justify-content: flex-end;
+    .add-flight {
+      color: var(--action);
+      width: auto;
+      appearance: none;
+      padding: 0 0 0 0.75rem;
+      margin: 0;
+      background: url(/common/images/icon_arrow_next.svg) no-repeat left top 50%/8px;
+      background-color: transparent;
+    }
+  }
+  .write-box {
+    width: 100%;
+    height: 3rem;
+    display: inline-block;
+    textarea {
+      width: calc(100% - 5rem);
+      height: 3rem;
+      float: left;
+      display: block;
+      border: 1px solid var(--g06);
+      appearance: none;
+      border-right: none;
+      padding: 0.5rem;
+      box-sizing: border-box;
+      border-radius: 0.5rem 0 0 0.5rem;
+    }
+    .action {
+      float: right;
+      border-radius: 0 0.5rem 0.5rem 0;
+      display: block;
+      width: 5rem;
+      height: 3rem;
+    }
+  }
+}

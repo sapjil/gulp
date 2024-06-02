@@ -1,0 +1,118 @@
+@media (min-width: 768px) {
+  .sns {
+    .popup-header,
+    .popup-content {
+      margin: 0 auto;
+      position: relative;
+      max-width: 960px;
+      font-size: 1rem;
+    }
+    .popup-content {
+      top: unset !important;
+      left: unset;
+    }
+    .item-summary {
+      padding: 2rem;
+      .list-item-map {
+        height: 460px;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+      }
+      .item-payment::after {
+        font-weight: normal;
+      }
+    }
+    .item-airplane {
+      .item {
+        &::after {
+          width: 27px;
+          height: 27px;
+          background-size: 40%;
+          background-position: center center;
+        }
+      }
+    }
+    .item-other {
+      font-size: 1rem;
+    }
+    .airport-group {
+      position: relative;
+    }
+    .airport-departure,
+    .airport-flighttime,
+    .airport-arrive {
+      font-size: 1rem;
+    }
+    .airport-departure {
+      > div {
+        position: absolute;
+        width: 40px;
+        height: 56px;
+        background: url('/common/images/ico_airline.svg') no-repeat center
+          center/contain;
+      }
+      b,
+      b + span {
+        margin-left: 50px;
+      }
+    }
+    .airport-arrive {
+      > div {
+        position: absolute;
+        right: 0;
+        width: 40px;
+        height: 56px;
+        background: url('/common/images/ico_airline.svg') no-repeat center
+          center/contain;
+      }
+      b,
+      b + span {
+        margin-right: 50px;
+      }
+    }
+    .list-item-outer {
+      .list-link span {
+        width: 140px;
+      }
+      .list-item-map {
+        width: 160px;
+      }
+    }
+    .accordion-item .goto-like {
+      padding: 0.5rem;
+    }
+    .detail-header {
+      padding: 1rem 2rem;
+      dt {
+        width: 90px;
+      }
+    }
+    .detail-body {
+      padding: 2rem 4rem;
+    }
+    .item-payment {
+      font-size: 2.2rem;
+    }
+    .schedule-detail-item {
+      margin-bottom: 2rem;
+      li {
+        line-height: 1.8;
+      }
+      &:last-child {
+        margin-bottom: 0;
+      }
+      .item {
+        font-size: 1rem;
+      }
+    }
+    .item-date {
+      font-size: 1rem;
+    }
+    .accordion-content {
+      padding-top: 1rem;
+    }
+    .list-item-outer {
+      margin-bottom: 1rem;
+    }
+  }
+}

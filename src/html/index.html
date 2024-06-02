@@ -1,0 +1,85 @@
+@@include('./../include/htmlheader.html')
+<!-- wrap -->
+<div class="wrap main">
+  <!-- header -->
+  <header id="header">
+    @@include('./../include/header.html')
+    <!-- menu -->
+    @@include('./../include/menu.html')
+  </header>
+  <!-- //header -->
+  <main>
+    <div
+      data-label="label"
+      aria-valuetext="xxx"
+      role="alertdialog"
+      aria-atomic="false">
+      ddd
+    </div>
+    <div class="swiper content2">
+      <!-- Additional required wrapper -->
+      <div class="swiper-wrapper">
+        <!-- Slides -->
+        <div class="swiper-slide">Slide 1</div>
+        <div class="swiper-slide">Slide 2</div>
+        <div class="swiper-slide">Slide 3</div>
+        <div class="swiper-slide">Slide 4</div>
+        <div class="swiper-slide">Slide 5</div>
+      </div>
+      <!-- If we need pagination -->
+      <div class="swiper-pagination"></div>
+
+      <!-- If we need navigation buttons -->
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+
+      <!-- If we need scrollbar -->
+      <div class="swiper-scrollbar"></div>
+    </div>
+
+    <!-- mainHeader -->
+    <div class="mainHeader">
+      <div class="mainHeaderSwiper">
+        <h2>h2</h2>
+        <p class="mammp">
+          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Minus
+          blanditiis eum repellat. Ullam, possimus repellat reprehenderit maxime
+          itaque id soluta fugit ipsam dolores harum delectus laboriosam ex.
+          Excepturi, provident maxime.
+        </p>
+        <div class="mainHeader_description">mainHeader_description</div>
+      </div>
+    </div>
+
+    <!-- mainContent -->
+    <div class="mainContent">
+      <h2>main content</h2>
+    </div>
+  </main>
+  @@include('./../include/footer.html')
+</div>
+<!-- //wrap -->
+@@include('./../include/bottom_util.html')
+<script>
+  const swiper1 = new swiperCustom({
+    customClassName: '.content1',
+    centeredSlides: false,
+    bannerAutoplay: false,
+    loop: true,
+    spaceBetween: 0,
+    slidesPerView: 1,
+    slidesPerView1: 1,
+    slidesPerView2: 1,
+  });
+
+  const swiper2 = new swiperCustom({
+    customClassName: '.content2',
+    bannerAutoplay: false,
+    spaceBetween: 20,
+    slidesPerView: 3,
+    slidesPerView1: 2,
+    slidesPerView2: 1,
+    loop: false,
+  });
+</script>
+@@include('./../include/htmlend.html')
