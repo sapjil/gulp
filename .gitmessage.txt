@@ -1,0 +1,20 @@
+# Template
+# Subject
+
+# Body
+
+# Footer: issue tracker id
+# 해결
+# 참고
+
+########################
+# Feat : 기능 추가
+# Fix : 수정
+# Docs : 문서 수정
+# Style : 기능 무관, 코드 포맷팅
+# Design : 사용자 UI 변경
+# Refactor : 코드 리팩토링 관련
+# Rename : 파일 수정 및 이동
+# Remove : 파일 삭제
+# Test : 테스트 코드 관련
+########################
