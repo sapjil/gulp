@@ -1,11 +1,8 @@
-.blind {
+.blind,
+.hidden {
   display: block;
   height: 1px;
   overflow: hidden;
   margin: 0;
   padding: 0;
 }
-
-// .roboto {
-//   font-family: 'Roboto' !important;
-// }

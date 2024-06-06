@@ -1,55 +1,143 @@
 /* Font */
+// Pretendard FONT
 @font-face {
-  font-family: 'Roboto';
+  font-family: "Pretendard";
+  font-weight: 900;
+  font-display: swap;
+  src:
+    local("Pretendard Black"),
+    url("/common/fonts/Pretendard-Black.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-Black.subset.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 800;
+  font-display: swap;
+  src:
+    local("Pretendard ExtraBold"),
+    url("/common/fonts/Pretendard-ExtraBold.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-ExtraBold.subset.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Pretendard Bold"),
+    url("/common/fonts/Pretendard-Bold.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-Bold.subset.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local("Pretendard SemiBold"),
+    url("/common/fonts/Pretendard-SemiBold.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-SemiBold.subset.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local("Pretendard Medium"),
+    url("/common/fonts/Pretendard-Medium.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-Medium.subset.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local("Pretendard Regular"),
+    url("/common/fonts/Pretendard-Regular.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-Regular.subset.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 300;
+  font-display: swap;
+  src:
+    local("Pretendard Light"),
+    url("/common/fonts/Pretendard-Light.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-Light.subset.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 200;
+  font-display: swap;
+  src:
+    local("Pretendard ExtraLight"),
+    url("/common/fonts/Pretendard-ExtraLight.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-ExtraLight.subset.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 100;
+  font-display: swap;
+  src:
+    local("Pretendard Thin"),
+    url("/common/fonts/Pretendard-Thin.subset.woff2") format("woff2"),
+    url("/common/fonts/Pretendard-Thin.subset.woff") format("woff");
+}
+
+// Roboto FONT
+@font-face {
+  font-family: "Roboto";
   font-weight: 300;
   src:
-    local('Roboto Regular'),
-    url('/common/fonts/Roboto-Regular.woff2') format('woff2'),
-    url('/common/fonts/Roboto-Regular.woff') format('woff');
-  // url('/common/fonts/Roboto-Regular.ttf') format('truetype');
+    local("Roboto Regular"),
+    url("/common/fonts/Roboto-Regular.woff2") format("woff2"),
+    url("/common/fonts/Roboto-Regular.woff") format("woff");
 }
 @font-face {
-  font-family: 'Roboto';
+  font-family: "Roboto";
   font-weight: 500;
   src:
-    local('Roboto Medium'),
-    url('/common/fonts/Roboto-Medium.woff2') format('woff2'),
-    url('/common/fonts/Roboto-Medium.woff') format('woff');
-  // url('/common/fonts/Roboto-Medium.ttf') format('truetype');
+    local("Roboto Medium"),
+    url("/common/fonts/Roboto-Medium.woff2") format("woff2"),
+    url("/common/fonts/Roboto-Medium.woff") format("woff");
 }
 @font-face {
-  font-family: 'Roboto';
+  font-family: "Roboto";
   font-weight: 700;
   src:
-    local('Roboto Bold'),
-    url('/common/fonts/Roboto-Bold.woff2') format('woff2'),
-    url('/common/fonts/Roboto-Bold.woff') format('woff');
-  // url('/common/fonts/Roboto-Bold.ttf') format('truetype');
+    local("Roboto Bold"),
+    url("/common/fonts/Roboto-Bold.woff2") format("woff2"),
+    url("/common/fonts/Roboto-Bold.woff") format("woff");
 }
+
+// NotoSansKR FONT
 @font-face {
-  font-family: 'NotoSansKR';
+  font-family: "NotoSansKR";
   font-weight: 300;
   src:
-    local('NotoSansKR Regular'),
-    url('/common/fonts/NotoSansKR-Regular.woff2') format('woff2'),
-    url('/common/fonts/NotoSansKR-Regular.woff') format('woff');
-  // url('/common/fonts/NotoSansKR-Regular.ttf') format('truetype');
+    local("NotoSansKR Regular"),
+    url("/common/fonts/NotoSansKR-Regular.woff2") format("woff2"),
+    url("/common/fonts/NotoSansKR-Regular.woff") format("woff");
 }
 @font-face {
-  font-family: 'NotoSansKR';
+  font-family: "NotoSansKR";
   font-weight: 500;
   src:
-    local('NotoSansKR Me`dium'),
-    url('/common/fonts/NotoSansKR-Medium.woff2') format('woff2'),
-    url('/common/fonts/NotoSansKR-Medium.woff') format('woff');
-  // url('/common/fonts/NotoSansKR-Medium.ttf') format('truetype');
+    local("NotoSansKR Me`dium"),
+    url("/common/fonts/NotoSansKR-Medium.woff2") format("woff2"),
+    url("/common/fonts/NotoSansKR-Medium.woff") format("woff");
 }
 @font-face {
-  font-family: 'NotoSansKR';
+  font-family: "NotoSansKR";
   font-weight: 700;
   src:
-    local('NotoSansKR Bold'),
-    url('/common/fonts/NotoSansKR-Bold.woff2') format('woff2'),
-    url('/common/fonts/NotoSansKR-Bold.woff') format('woff');
-  // url('/common/fonts/NotoSansKR-Bold.ttf') format('truetype');
+    local("NotoSansKR Bold"),
+    url("/common/fonts/NotoSansKR-Bold.woff2") format("woff2"),
+    url("/common/fonts/NotoSansKR-Bold.woff") format("woff");
 }
