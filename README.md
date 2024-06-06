@@ -1,15 +1,18 @@
-# update check
+# gulp5 update
 
-npm outdated
+- 시작: `npx gulp`
+- 이미지 압축: `npx gulp minimage`
 
-# git config setting
+# git config
+
+## git config setting
 
 - `.git` 폴더안의 `config` 파일 수정
-- `editor`, `alias`, `commit` 속성 추가
+- `alias`, `commit` 속성 추가
+
+## git config alias
 
 ```
-[core]
-	editor = code --wait
 [alias]
   # glog = log --pretty='format:%C(yellow)%h %C(green)%cd %C(reset)%s %C(red)%d %C(cyan)[%an]' --date=format:'%c' --all --graph
 	# logline = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit

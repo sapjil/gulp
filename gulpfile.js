@@ -1,62 +1,85 @@
-const gulp = require('gulp');
-const { src, dest, watch, series, parallel } = require('gulp');
-const sass = require('gulp-sass')(require('sass'));
-const sourcemaps = require('gulp-sourcemaps');
-const cssnano = require('gulp-cssnano');
-const postcss = require('gulp-postcss');
-const autoprefixer = require('autoprefixer');
-const csscomb = require('gulp-csscomb');
-const stylelint = require('stylelint');
-const concat = require('gulp-concat');
-const rename = require('gulp-rename');
-const jshint = require('gulp-jshint');
-const replace = require('gulp-replace');
-const uglify = require('gulp-uglify');
-const terser = require('gulp-terser');
-const fileinclude = require('gulp-file-include');
-const browserSync = require('browser-sync').create();
-const prettyHtml = require('gulp-pretty-html');
+import gulp from "gulp";
+import { dest, watch, series } from "gulp";
+import gulpSass from "gulp-sass";
+import sassCompiler from "sass";
+import sourcemaps from "gulp-sourcemaps";
+import cssnano from "gulp-cssnano";
+import postcss from "gulp-postcss";
+import autoprefixer from "autoprefixer";
+import csscomb from "gulp-csscomb";
+import stylelint from "stylelint";
+const sass = gulpSass(sassCompiler);
+import browserSync from "browser-sync";
+import fileinclude from "gulp-file-include";
+import prettyHtml from "gulp-pretty-html";
+import concat from "gulp-concat";
+import rename from "gulp-rename";
+import jshint from "gulp-jshint";
+import replace from "gulp-replace";
+import uglify from "gulp-uglify";
+import terser from "gulp-terser";
+import imagemin, { gifsicle, mozjpeg, optipng, svgo } from "gulp-imagemin";
+import newer from "gulp-newer";
 
-const paths = {
-  html: {
-    src: ['./src/html/**/*.html'],
-    dest: './dist/',
-  },
-  styles: {
-    src: ['./src/scss/**/*.scss'],
-    dest: './dist/common/css/',
-  },
-  images: {
-    src: ['./src/images/**/*'],
-    dest: './dist/common/images/',
-  },
-  scripts: {
-    src: ['./src/js/*.js'],
-    dest: './dist/common/js/',
-  },
-  library_scripts: {
-    src: ['./src/js/lib/**/*'],
-    dest: './dist/common/js/lib/',
-  },
-  fonts: {
-    src: ['./src/fonts/*'],
-    dest: './dist/common/fonts/',
-  },
-  cachebust: {
-    src: ['./dist/**/*.html'],
-    dest: './dist/',
-  },
+const paths_src = {
+  html: "./src/html/**/*.html",
+  css: "./src/scss/**/*.scss",
+  image: "./src/images/**/*",
+  js: "./src/js/*.js",
+  jslib: "./src/js/lib/**/*",
+  font: "./src/fonts/*",
+  cach: "./dist/**/*.html",
 };
 
-function includes() {
-  return src(paths.html.src)
-    .pipe(fileinclude({ prefix: '@@', basepath: '@file' }))
+const paths_dist = {
+  html: "./dist/",
+  css: "./dist/common/css/",
+  image: "./dist/common/images/",
+  js: "./dist/common/js/",
+  jslib: "./dist/common/js/lib/",
+  font: "./dist/common/fonts/",
+  cach: "./dist/",
+};
+
+const compileSass = (done) => {
+  const plugin = [stylelint()];
+  gulp
+    .src(paths_src.css)
+    .pipe(sourcemaps.init())
+    .pipe(sass().on("error", sass.logError))
+    .pipe(postcss(plugin, [autoprefixer({ grid: true, csscade: false })]))
+    .pipe(csscomb())
+    .pipe(dest(paths_dist.css))
+    .pipe(sourcemaps.write("./maps"));
+  done();
+};
+export { compileSass };
+
+const minifyStyles = (done) => {
+  gulp
+    .src(paths_src.css)
+    .pipe(sourcemaps.init())
+    .pipe(sass().on("error", sass.logError))
+    .pipe(postcss([autoprefixer({ grid: true, csscade: false })]))
+    .pipe(cssnano())
+    .pipe(rename({ suffix: ".min" }))
+    .pipe(sourcemaps.write("./maps"))
+    .pipe(dest(paths_dist.css))
+    .pipe(browserSync.stream());
+  done();
+};
+export { minifyStyles };
+
+const includes = (done) => {
+  gulp
+    .src(paths_src.html)
+    .pipe(fileinclude({ prefix: "@@", basepath: "@file" }))
     .pipe(
       prettyHtml({
         indent_size: 2,
-        indent_char: ' ',
-        unformatted: ['code', 'pre', 'em', 'strong', 'span', 'i', 'b', 'br'],
-        extra_liners: ['body'],
+        indent_char: " ",
+        unformatted: ["code", "pre", "em", "strong", "span", "i", "b", "br"],
+        extra_liners: ["body"],
         max_preserve_newlines: 0,
         indent_inner_html: true,
         end_with_newline: true,
@@ -64,113 +87,123 @@ function includes() {
         // preserve_newlines: false,
       }),
     )
-    .pipe(dest(paths.html.dest));
-}
+    .pipe(dest(paths_dist.html));
+  done();
+};
+export { includes };
 
-function copyFont() {
-  return src(paths.fonts.src).pipe(dest(paths.fonts.dest));
-}
+const cacheBust = (done) => {
+  gulp
+    .src(paths_src.cach)
+    .pipe(replace(/cache_bust=\d+/g, "cache_bust=" + new Date().getTime()))
+    .pipe(dest(paths_dist.cach));
+  done();
+};
+export { cacheBust };
 
-function copyLibraryScript() {
-  return src(paths.library_scripts.src).pipe(dest(paths.library_scripts.dest));
-}
+const copyFont = (done) => {
+  gulp.src(paths_src.font).pipe(dest(paths_dist.font));
+  done();
+};
 
-function copyImage() {
-  return src(paths.images.src).pipe(dest(paths.images.dest));
-}
+const copyScript = (done) => {
+  gulp.src(paths_src.jslib).pipe(dest(paths_dist.jslib));
+  done();
+};
 
-function compileStyles() {
-  const plugin = [stylelint()];
+const copyImage = (done) => {
+  gulp
+    .src(paths_src.image, { encoding: false })
+    .pipe(newer(paths_src.image, { encoding: false }))
+    .pipe(dest(paths_dist.image));
+  done();
+};
+export { copyImage };
 
-  return src(paths.styles.src)
+const minimage = (done) => {
+  gulp
+    .src(paths_src.image, { encoding: false })
+    .pipe(
+      imagemin(
+        [
+          gifsicle({ interlaced: true }),
+          mozjpeg({ quality: 75, progressive: true }),
+          optipng({ optimizationLevel: 1 }),
+          svgo({
+            plugins: [
+              {
+                name: "removeViewBox",
+                active: true,
+              },
+              {
+                name: "cleanupIDs",
+                active: false,
+              },
+            ],
+          }),
+        ],
+        { verbose: true },
+      ),
+    )
+    .pipe(dest(paths_dist.image));
+  done();
+};
+export { minimage };
+
+const minifyScripts = (done) => {
+  gulp
+    .src(paths_src.js)
     .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
-    .pipe(postcss(plugin, [autoprefixer({ grid: true, csscade: false })]))
-    .pipe(csscomb())
-    .pipe(dest(paths.styles.dest))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(browserSync.stream());
-}
-
-function minifyStyles() {
-  return src(paths.styles.src)
-    .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
-    .pipe(postcss([autoprefixer({ grid: true, csscade: false })]))
-    .pipe(cssnano())
-    .pipe(rename({ suffix: '.min' }))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(dest(paths.styles.dest))
-    .pipe(browserSync.stream());
-}
-
-function minifyScripts() {
-  return src(paths.scripts.src)
-    .pipe(sourcemaps.init())
-    .pipe(concat('all.js'))
+    .pipe(concat("all.js"))
     .pipe(jshint())
-    .pipe(jshint.reporter('jshint-stylish'))
-    .pipe(jshint.reporter('fail'))
-    .pipe(dest(paths.scripts.dest))
-    .pipe(terser().on('error', (error) => console.log(error)))
+    .pipe(jshint.reporter("jshint-stylish"))
+    .pipe(jshint.reporter("fail"))
+    .pipe(dest(paths_dist.js))
+    .pipe(terser().on("error", (error) => console.log(error)))
     .pipe(uglify())
-    .pipe(rename({ suffix: '.min' }))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(dest(paths.scripts.dest));
-}
+    .pipe(rename({ suffix: ".min" }))
+    .pipe(sourcemaps.write("./maps"))
+    .pipe(dest(paths_dist.js));
+  done();
+};
+export { minifyScripts };
 
-function cacheBust() {
-  return src(paths.cachebust.src)
-    .pipe(replace(/cache_bust=\d+/g, 'cache_bust=' + new Date().getTime()))
-    .pipe(dest(paths.cachebust.dest));
-}
+const browserReload = (done) => {
+  browserSync.reload();
+  done();
+};
 
-function sync() {
-  browserSync.init({
-    server: './dist/',
+const syncFiles = (done) => {
+  browserSync({
+    server: {
+      baseDir: "./dist/",
+      index: "index.html",
+    },
   });
-  watch(paths.styles.src, compileStyles).on('change', browserSync.reload);
-  watch(paths.styles.src, minifyStyles).on('change', browserSync.reload);
-  watch(paths.html.src, includes).on('change', browserSync.reload);
-  watch(paths.html.src).on('change', browserSync.reload);
-  watch(paths.scripts.src, minifyScripts).on('change', browserSync.reload);
-  watch(paths.scripts.src).on('change', browserSync.reload);
-  watch(paths.library_scripts.src, copyLibraryScript).on(
-    'change',
-    browserSync.reload,
-  );
-  watch('./src/include/**/*.html', includes).on('change', browserSync.reload);
-}
+  gulp.watch(paths_src.css, browserReload);
+  gulp.watch(paths_src.html, browserReload);
+  gulp.watch(paths_src.js, browserReload);
+  done();
+};
+export { syncFiles };
 
-function watcher() {
-  watch(paths.html.src, series(includes, cacheBust));
-  watch(paths.styles.src, parallel(compileStyles, minifyStyles, cacheBust));
-  watch(paths.scripts.src);
-  watch(paths.images.src);
-}
+const watcher = (done) => {
+  watch(paths_src.image, copyImage);
+  watch(paths_src.css, series(compileSass, minifyStyles));
+  watch(paths_src.html, includes);
+  watch(paths_src.js, minifyScripts);
+  done();
+};
+export { watcher };
 
-exports.sync = sync;
-exports.copyFont = copyFont;
-exports.copyLibraryScript = copyLibraryScript;
-exports.copyImage = copyImage;
-exports.compileStyles = compileStyles;
-exports.minifyStyles = minifyStyles;
-exports.minifyScripts = minifyScripts;
-exports.cacheBust = cacheBust;
-exports.includes = includes;
-exports.watcher = watcher;
-
-exports.default = series(
-  parallel(
-    minifyScripts,
-    minifyStyles,
-    includes,
-    copyFont,
-    compileStyles,
-    copyLibraryScript,
-    copyImage,
-  ),
-  cacheBust,
-  sync,
+export default series(
+  copyFont,
+  copyImage,
+  copyScript,
+  compileSass,
+  minifyStyles,
+  minifyScripts,
+  includes,
+  syncFiles,
   watcher,
 );
