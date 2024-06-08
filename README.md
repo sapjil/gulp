@@ -1,7 +1,12 @@
-# gulp5 update
+# Gulp5 update
 
 - 시작: `npx gulp`
+- HTML 생성 및 관리: `Nunjucks`
 - 이미지 압축: `npx gulp minimage`
+
+# TODO
+
+- tailwind 적용
 
 # git config
 
