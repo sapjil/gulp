@@ -1,0 +1,12 @@
+<!-- header -->
+<header class="header">
+	<strong id="home">
+		<a href="/" class="home-logo">header</a>
+	</strong>
+	<nav>
+    {%- for navgation in gnb_data %}
+    <a href="{{ navgation.href }}">{{ navgation.name }}</a>
+    {%- endfor %}
+  </nav>
+</header>
+<!-- // header -->

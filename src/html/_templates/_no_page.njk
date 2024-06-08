@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gulp Setting</title>
+	{% include "./_include/_meta.njk" %}
+</head>
+<body>
+<!-- wrap -->
+<div class="wrap">
+  <!-- content -->
+	<main class="container">
+		{% block content %}
+		{% endblock %}
+  </main>
+  <!-- // content -->
+</div>
+<!-- //wrap -->
+
+{% block footerscript %}
+{% endblock %}
+{% include "./../_templates/_include/_htmlend.njk" %}

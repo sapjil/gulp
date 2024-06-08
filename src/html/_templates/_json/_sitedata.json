@@ -1,0 +1,39 @@
+{
+  "gnb_data": [
+    {
+      "name": "home",
+      "href": "/"
+    },
+    {
+      "name": "about",
+      "href": "/about/"
+    },
+    {
+      "name": "exam",
+      "href": "/exam/"
+    }
+  ],
+  "list_data": [
+    {
+      "id": 0,
+      "text": "Lorem link",
+      "href": "/link1/"
+    },
+    {
+      "id": 1,
+      "text": "Lorem link",
+      "href": "/link2/"
+    },
+    {
+      "id": 2,
+      "text": "Lorem link",
+      "href": "/link3/"
+    }
+  ],
+  "item_data": [
+    {
+      "id": 0,
+      "text": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+    }
+  ]
+}
