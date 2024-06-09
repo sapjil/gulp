@@ -6,7 +6,14 @@
 
 # TODO
 
-- tailwind 적용
+- <del>gulp 5 업데이트</del>
+- <del>minimage 적용</del>
+- <del>notify 적용</del>
+- <del>htmlhint 적용</del>
+- <del>html include 방식을 Nunjucks로 변경</del>
+- <del>stylelint 충돌 해결</del>
+- <del>tailwind 적용</del>
+- csscomb 충돌 해결: tailwind 적용시 comb와 충돌
 
 # git config
 
