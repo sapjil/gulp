@@ -6,14 +6,15 @@
 
 # TODO
 
-- <del>gulp 5 업데이트</del>
-- <del>minimage 적용</del>
-- <del>notify 적용</del>
-- <del>htmlhint 적용</del>
-- <del>html include 방식을 Nunjucks로 변경</del>
-- <del>stylelint 충돌 해결</del>
-- <del>tailwind 적용</del>
-- csscomb 충돌 해결: tailwind 적용시 comb와 충돌
+- [x] gulp 5 업데이트
+- [x] minimage 적용
+- [x] notify 적용
+- [x] htmlhint 적용
+- [x] html include 방식을 Nunjucks로 변경
+- [x] stylelint 충돌 해결
+- [x] tailwind 적용
+- [ ] csscomb 충돌 해결: tailwind 적용시 comb와 충돌
+- [ ] yarn offline 패키지 설정
 
 # git config
 
