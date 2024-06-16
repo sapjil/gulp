@@ -1,4 +1,10 @@
 {
+  "site_data": {
+    "base_url": "localhost",
+    "title": "minamiland",
+    "description": "세상을 이롭게, 그전에 나먼저 이롭게",
+    "keyword": "markup, web, a11y, portfolio"
+  },
   "gnb_data": [
     {
       "name": "home",
@@ -7,6 +13,10 @@
     {
       "name": "about",
       "href": "/about/"
+    },
+    {
+      "name": "info",
+      "href": "/info/"
     },
     {
       "name": "exam",

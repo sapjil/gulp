@@ -1,10 +1,13 @@
 {%- extends "./../_templates/_sub_layout.njk" -%}
-{%- import "./../_templates/_macro/_macro.njk" as macro -%}
+{% set description ='' %}
+{% set keyword ='about' %}
+{% set title = 'ABOUT!' %}
 
 {% block content %}
-<div class="wrap">
+<article class="wrap">
   <h1 class="text-3xl">about 페이지 입니다!</h1>
-</div>
+	<p>{% block page_title %}ABO!!UT!{% endblock %}</p>
+</article>
 {%- endblock %}
 
 {% block footerscript %}

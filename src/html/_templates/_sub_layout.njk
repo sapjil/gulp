@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>SUB LAYOUT</title>
 	{% include "./_include/_meta.njk" %}
 </head>
 <body>
-<!-- wrap -->
 <div class="wrap">
   {% include "./../_templates/_include/_header.njk" %}
 
-  <!-- content -->
 	<main class="main-container sub">
 		{% block content %}
 		{% endblock %}
@@ -18,9 +14,10 @@
   <!-- // content -->
 
   {% include "./../_templates/_include/_footer.njk" %}
+
 	{% include "./../_templates/_include/_bottomutil.njk" %}
 </div>
-<!-- //wrap -->
+<!-- // wrap -->
 
 
 {% block footerscript %}

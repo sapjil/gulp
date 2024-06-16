@@ -1,12 +1,18 @@
 <meta charset="UTF-8" />
+<title>
+	{%- if title -%}
+		{{title}} | {{site_data.title}}
+	{%- else -%}
+		{{site_data.title}}
+	{%- endif -%}
+</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="project" />
-<meta name="keywords" content="project" />
+<meta name="description" content="{%- if description -%}{{description}}{% else %}{{site_data.description}}{% endif %}" />
+<meta name="keywords" content="{{site_data.keyword}}{%- if keyword -%}, {{keyword}}{%- endif -%}" />
 <meta name="robots" content="index, follow" />
-<base href="localhost" />
-{# <title>site title</title> #}
+<base href="{{site_data.base_url}}" />
 <link rel="stylesheet" href="/common/css/style.css" />
-<link rel="stylesheet" href="/common/js/lib/swiper-bundle.css" />
+{# <link rel="stylesheet" href="/common/js/lib/swiper-bundle.css" /> #}
+<link rel="preload" href="/common/js/lib/swiper-bundle.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
 <script src="/common/js/lib/swiper-bundle.min.js"></script>
 <script src="/common/js/all.js"></script>
-

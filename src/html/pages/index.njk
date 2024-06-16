@@ -1,10 +1,12 @@
 {%- extends "./../_templates/_layout.njk" -%}
 {%- import "./../_templates/_macro/_macro.njk" as macro -%}
+{% set title = '' %}
 
 {% block content %}
 <div class="wrap">
   <h1>index 페이지 입니다!</h1>
-  {{ macro.image( "image_box", "/common/images/google.jpeg", "메인 이미지 입니다.", width="200px" ) }}
+  {{ macro.image( "image_box", "/common/images/img_normal.jpg", "/common/images/img_small.png", "/common/images/img_big.png", "메인 이미지 입니다.", width="200px" ) }}
+	{# <img src="/common/images/google.jpeg" alt="메인 이미지 입니다."> #}
 	<div>
 		<ul class="list_wrap">
     {%- for listData in list_data %}

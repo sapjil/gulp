@@ -1,7 +1,8 @@
 
-{%- macro image( class, src, alt, width="", height="auto" ) -%}
+{%- macro image( class, src, srcsmall, srclarge, alt, width="", height="auto" ) -%}
   <figure class="{{ class }}">
-    <img src="{{ src }}" width="{{ width }}" height="{{ height }}">
+    {# <img src="{{ src }}" width="{{ width }}" height="{{ height }}" alt=""> #}
+		<img src="{{ src }}" width="{{ width }}" height="{{ height }}" alt="" srcset="{{ srcsmall }} 480w, {{ srclarge }} 1080w" sizes="50vw">
     <figcaption>{{ alt }}</figcaption>
   </figure>
 {%- endmacro %}
