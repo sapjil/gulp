@@ -27,7 +27,7 @@ import terser from 'gulp-terser';
 import imagemin, { gifsicle, mozjpeg, optipng, svgo } from 'gulp-imagemin';
 import newer from 'gulp-newer';
 import tailwindcss from 'tailwindcss';
-import sitemap from 'gulp-sitemap';
+import generatemap from 'gulp-sitemap';
 
 const paths_src = {
   njk: './src/html/pages/**/*.njk',
@@ -55,11 +55,11 @@ const compileSass = (done) => {
     .src(paths_src.css)
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
+    .pipe(csscomb())
     .pipe(
       postcss([stylelint(), tailwindcss(), autoprefixer({ csscade: false })]),
     )
     .pipe(dest(paths_dist.css))
-    // .pipe(csscomb())
     .pipe(cssnano())
     .pipe(rename({ suffix: '.min' }))
     .pipe(dest(paths_dist.css))
@@ -215,18 +215,18 @@ const syncFiles = (done) => {
 };
 export { syncFiles };
 
-const generatemap = (done) => {
+const sitemap = (done) => {
   gulp
     .src('./dist/**/*.html', { read: false })
     .pipe(
-      sitemap({
+      generatemap({
         siteUrl: 'https://sapjil.net',
       }),
     )
     .pipe(dest('./dist'));
   done();
 };
-export { generatemap };
+export { sitemap };
 
 const watcher = (done) => {
   // watch(paths_src.image, copyImage);

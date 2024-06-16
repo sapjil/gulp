@@ -1,9 +1,16 @@
 {
   "site_data": {
     "base_url": "localhost",
+    "name": "minamiland",
     "title": "minamiland",
     "description": "세상을 이롭게, 그전에 나먼저 이롭게",
-    "keyword": "markup, web, a11y, portfolio"
+    "keyword": "markup, web, a11y, portfolio",
+    "optImage": "/opt.png",
+    "fbAppId": "iiiiiiiiiiiiiii",
+    "fbAdmins": "aaaaaaaaaaaaaaa",
+    "twitterCard": "summary_large_image",
+    "twitterSite": "@account_name",
+    "gtm": "GTM-XXXXXX"
   },
   "gnb_data": [
     {
