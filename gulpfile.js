@@ -27,6 +27,7 @@ import terser from 'gulp-terser';
 import imagemin, { gifsicle, mozjpeg, optipng, svgo } from 'gulp-imagemin';
 import newer from 'gulp-newer';
 import tailwindcss from 'tailwindcss';
+import sitemap from 'gulp-sitemap';
 
 const paths_src = {
   njk: './src/html/pages/**/*.njk',
@@ -192,6 +193,7 @@ const syncFiles = (done) => {
   browserSync(
     {
       server: {
+        // https: true,
         baseDir: './dist/',
         index: 'index.html',
       },
@@ -212,6 +214,19 @@ const syncFiles = (done) => {
   done();
 };
 export { syncFiles };
+
+const generatemap = (done) => {
+  gulp
+    .src('./dist/**/*.html', { read: false })
+    .pipe(
+      sitemap({
+        siteUrl: 'https://sapjil.net',
+      }),
+    )
+    .pipe(dest('./dist'));
+  done();
+};
+export { generatemap };
 
 const watcher = (done) => {
   // watch(paths_src.image, copyImage);
