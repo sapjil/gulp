@@ -56,9 +56,8 @@ const compileSass = (done) => {
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(csscomb())
-    .pipe(
-      postcss([stylelint(), tailwindcss(), autoprefixer({ csscade: false })]),
-    )
+    // tailwindcss option: tailwindcss()
+    .pipe(postcss([stylelint(), autoprefixer({ csscade: false })]))
     .pipe(dest(paths_dist.css))
     .pipe(cssnano())
     .pipe(rename({ suffix: '.min' }))
@@ -76,10 +75,15 @@ const html = (done) => {
   const datafile = () => {
     return json_all;
   };
-
   gulp
     .src([paths_src.njk, '!' + paths_src.njktemp])
-    .pipe(plumber({ errorHandler: notify.onError('<%== error.message %>') }))
+    .pipe(
+      plumber({
+        errorHandler: notify.onError(
+          '<%== error.message %>, <%== file.relative %>',
+        ),
+      }),
+    )
     .pipe(data(datafile))
     .pipe(
       nunjucksRender({
@@ -214,6 +218,14 @@ const syncFiles = (done) => {
   done();
 };
 export { syncFiles };
+
+const markuplintTask = (done) => {
+  gulp
+    .src('./dist/**/*.html')
+    .pipe(markuplint({ rulesetPath: './.markuplintrc' }));
+  done();
+};
+export { markuplintTask };
 
 const sitemap = (done) => {
   gulp

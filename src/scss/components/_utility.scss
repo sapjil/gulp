@@ -6,3 +6,17 @@
   margin: 0;
   padding: 0;
 }
+
+.color-swatch-tile {
+  padding-bottom: 1rem;
+  .color-swatch {
+    padding: 1rem;
+  }
+  .color-name {
+    padding-top: 1rem;
+    padding-left: 1rem;
+  }
+  .color-notes {
+    padding-left: 1rem;
+  }
+}

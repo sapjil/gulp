@@ -1,4 +1,5 @@
 
+
 {%- macro image( class, src, srcsmall, srclarge, alt, width="", height="auto" ) -%}
   <figure class="{{ class }}">
     {# <img src="{{ src }}" width="{{ width }}" height="{{ height }}" alt=""> #}
@@ -6,3 +7,17 @@
     <figcaption>{{ alt }}</figcaption>
   </figure>
 {%- endmacro %}
+
+{% macro cardSwatch(colorName, colorValue, colorNotes) %}
+  <div class="color-swatch-tile">
+    <div class="color-swatch" style="background: {{ colorValue }};">
+			{{ colorName }}
+    </div>
+    <div class="color-name">
+      color-name: <span style="color:{{ colorValue }}">{{ colorName }}</span>
+    </div>
+    <div class="color-notes">
+      color-notes: <span style="color:{{ colorValue }}">{{ colorNotes }}</span>
+    </div>
+  </div>
+{% endmacro %}

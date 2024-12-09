@@ -1,0 +1,13 @@
+{
+  "extends": ["markuplint:recommended"],
+  "excludeFiles": ["./node_modules/**/*"],
+  "parser": { ".njk$": "@markuplint/nunjucks-parser" },
+  "nodeRules": [
+    {
+      "selector": "img",
+      "rules": {
+        "required-attr": ["src", "alt"]
+      }
+    }
+  ]
+}

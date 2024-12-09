@@ -1,11 +1,12 @@
 {
   "site_data": {
-    "base_url": "localhost",
+    "root": "/",
+    "siteurl": "/",
     "name": "minamiland",
     "title": "minamiland",
     "description": "세상을 이롭게, 그전에 나먼저 이롭게",
     "keyword": "markup, web, a11y, portfolio",
-    "optImage": "/opt.png",
+    "optimage": "/default-sapjil.png",
     "fbAppId": "iiiiiiiiiiiiiii",
     "fbAdmins": "aaaaaaaaaaaaaaa",
     "twitterCard": "summary_large_image",
