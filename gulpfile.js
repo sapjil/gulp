@@ -1,14 +1,14 @@
 import gulp from 'gulp';
 import { dest, watch, series } from 'gulp';
-import gulpSass from 'gulp-sass';
-import sassCompiler from 'sass';
+import * as sass from 'sass';
 import sourcemaps from 'gulp-sourcemaps';
-import cssnano from 'gulp-cssnano';
+import applySourceMap from 'vinyl-sourcemaps-apply';
+import { pathToFileURL, fileURLToPath } from 'url';
+import cssnanoPlugin from 'cssnano';
 import postcss from 'gulp-postcss';
 import autoprefixer from 'autoprefixer';
 import csscomb from 'gulp-csscomb';
 import stylelint from 'stylelint';
-const sass = gulpSass(sassCompiler);
 import browserSync from 'browser-sync';
 import prettyHtml from 'gulp-pretty-html';
 import nunjucksRender from 'gulp-nunjucks-render';
@@ -24,7 +24,9 @@ import jshint from 'gulp-jshint';
 import replace from 'gulp-replace';
 import uglify from 'gulp-uglify';
 import terser from 'gulp-terser';
-import imagemin, { gifsicle, mozjpeg, optipng, svgo } from 'gulp-imagemin';
+import sharp from 'sharp';
+import { Transform } from 'stream';
+import path from 'path';
 import newer from 'gulp-newer';
 import tailwindcss from 'tailwindcss';
 import generatemap from 'gulp-sitemap';
@@ -50,17 +52,58 @@ const paths_dist = {
   cach: './dist/',
 };
 
+const compileScss = () =>
+  new Transform({
+    objectMode: true,
+    transform(file, _enc, callback) {
+      if (file.isNull() || path.basename(file.path).startsWith('_')) {
+        return callback();
+      }
+      if (file.isStream()) {
+        return callback(new Error('Streaming not supported'));
+      }
+      try {
+        const result = sass.compileString(file.contents.toString(), {
+          url: pathToFileURL(file.path),
+          loadPaths: [path.dirname(file.path)],
+          sourceMap: !!file.sourceMap,
+          sourceMapIncludeSources: true,
+        });
+        if (file.sourceMap && result.sourceMap) {
+          const sourceMap = result.sourceMap;
+          sourceMap.file = path.basename(file.path, '.scss') + '.css';
+          sourceMap.sources = sourceMap.sources.map((src) =>
+            path
+              .relative(path.dirname(file.path), fileURLToPath(src))
+              .split(path.sep)
+              .join('/'),
+          );
+          applySourceMap(file, sourceMap);
+        }
+        file.contents = Buffer.from(result.css);
+        file.path = path.join(
+          path.dirname(file.path),
+          path.basename(file.path, '.scss') + '.css',
+        );
+        callback(null, file);
+      } catch (error) {
+        console.error(`[sass] ${file.path}\n${error.message}`);
+        callback();
+      }
+    },
+  });
+
 const compileSass = (done) => {
   gulp
     .src(paths_src.css)
     .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
+    .pipe(compileScss())
     .pipe(csscomb())
     .pipe(
       postcss([stylelint(), tailwindcss(), autoprefixer({ csscade: false })]),
     )
     .pipe(dest(paths_dist.css))
-    .pipe(cssnano())
+    .pipe(postcss([cssnanoPlugin()]))
     .pipe(rename({ suffix: '.min' }))
     .pipe(dest(paths_dist.css))
     .pipe(sourcemaps.write('./maps'));
@@ -136,31 +179,44 @@ const copyImage = (done) => {
 };
 export { copyImage };
 
+const compressImage = () =>
+  new Transform({
+    objectMode: true,
+    transform(file, _enc, callback) {
+      if (file.isNull() || file.isStream()) {
+        return callback(null, file);
+      }
+      const ext = path.extname(file.path).toLowerCase();
+      let pipeline;
+      if (ext === '.jpg' || ext === '.jpeg') {
+        pipeline = sharp(file.contents).jpeg({
+          quality: 75,
+          progressive: true,
+          mozjpeg: true,
+        });
+      } else if (ext === '.png') {
+        pipeline = sharp(file.contents).png({
+          compressionLevel: 9,
+          adaptiveFiltering: true,
+        });
+      } else {
+        return callback(null, file);
+      }
+      const original = file.contents;
+      pipeline
+        .toBuffer()
+        .then((buffer) => {
+          file.contents = buffer.length < original.length ? buffer : original;
+          callback(null, file);
+        })
+        .catch(callback);
+    },
+  });
+
 const minimage = (done) => {
   gulp
     .src(paths_src.image, { encoding: false })
-    .pipe(
-      imagemin(
-        [
-          gifsicle({ interlaced: true }),
-          mozjpeg({ quality: 75, progressive: true }),
-          optipng({ optimizationLevel: 1 }),
-          svgo({
-            plugins: [
-              {
-                name: 'removeViewBox',
-                active: true,
-              },
-              {
-                name: 'cleanupIDs',
-                active: false,
-              },
-            ],
-          }),
-        ],
-        { verbose: true },
-      ),
-    )
+    .pipe(compressImage())
     .pipe(dest(paths_dist.image));
   done();
 };
