@@ -122,7 +122,7 @@ const html = (done) => {
 
   gulp
     .src([paths_src.njk, '!' + paths_src.njktemp])
-    .pipe(plumber({ errorHandler: notify.onError('<%== error.message %>') }))
+    .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
     .pipe(data(datafile))
     .pipe(
       nunjucksRender({

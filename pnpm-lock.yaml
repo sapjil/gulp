@@ -61,8 +61,8 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
       gulp-notify:
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^5.0.0
+        version: 5.0.0
       gulp-nunjucks-render:
         specifier: ^2.2.3
         version: 2.2.3(chokidar@3.6.0)
@@ -105,9 +105,6 @@ importers:
       jshint-stylish:
         specifier: ^2.2.1
         version: 2.2.1
-      lodash.template:
-        specifier: ^4.5.0
-        version: 4.18.1
       node-uuid:
         specifier: ^1.4.8
         version: 1.4.8
@@ -2039,9 +2036,9 @@ packages:
   gulp-newer@1.4.0:
     resolution: {integrity: sha512-h79fGO55S/P9eAADbLAP9aTtVYpLSR1ONj08VPaSdVVNVYhTS8p1CO1TW7kEMu+hC+sytmCqcUr5LesvZEtDoQ==}
 
-  gulp-notify@4.0.0:
-    resolution: {integrity: sha512-0cdDvZkHVqu4tqrcOI/jL5YdxYEIPQ7+p3YxnO48w5hhPSisvogZ887qL+fpYItg9m4MUhJ5Se8p8xGy3uJESA==}
-    engines: {node: '>=0.8.0', npm: '>=1.2.10'}
+  gulp-notify@5.0.0:
+    resolution: {integrity: sha512-7ib3qN7lbEbrOjH9zU6Uh2RLrTBEGlSWWXqStSAGG6TwYC2WFur180iDR8LZv106gW4/b3PY+kW4DQaJkD/vpA==}
+    engines: {node: '>=18.0.0'}
 
   gulp-nunjucks-render@2.2.3:
     resolution: {integrity: sha512-YHrmwiwPw2DN16WJVj8S2tgUanB1ssZE8e5rRF6rH1T41mhO7r59iAqw92Yz5WSZXYB9G+uYXDTCODgixYPIRw==}
@@ -2408,9 +2405,6 @@ packages:
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  lodash._reinterpolate@3.0.0:
-    resolution: {integrity: sha512-xYHt68QRoYGjeeM/XOE1uJtvXQAgvszfBhjV4yvsQH0u2i9I6cI6c6/eG4Hh3UAOVn0y/xAXwmTzEay49Q//HA==}
-
   lodash.assign@4.2.0:
     resolution: {integrity: sha512-hFuH8TY+Yji7Eja3mGiuAxBqLagejScbG8GbG0j6o9vzn0YL14My+ktnqtZgFTosKymC9/44wP6s7xyuLfnClw==}
 
@@ -2431,13 +2425,6 @@ packages:
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
-
-  lodash.template@4.18.1:
-    resolution: {integrity: sha512-5urZrLnV/VD6zHK5KsVtZgt7H19v51mIzoS0aBNH8yp3I8tbswrEjOABOPY8m8uB7NuibubLrMX+Y0PXsU9X+w==}
-    deprecated: This package is deprecated. Use https://socket.dev/npm/package/eta instead.
-
-  lodash.templatesettings@4.2.0:
-    resolution: {integrity: sha512-stgLz+i3Aa9mZgnjr/O+v9ruKZsPsndy7qPZOchbqk2cnTU1ZaldKK+v7m54WoKIyxiuMZTKT2H81F8BeAc3ZQ==}
 
   lodash.truncate@4.4.2:
     resolution: {integrity: sha512-jttmRe7bRse52OsWIMDLaXxWqRAmtIUccAQ3garviCqJjafXOfNMO0yMfNpdD6zbGaTU0P5Nz7e7gAT6cKmJRw==}
@@ -2563,8 +2550,8 @@ packages:
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
 
-  node-notifier@9.0.1:
-    resolution: {integrity: sha512-fPNFIp2hF/Dq7qLDzSg4vZ0J4e9v60gJR+Qx7RbjbWqzPDdEqeVpEx5CFeDAELIl+A/woaaNn1fQ5nEVerMxJg==}
+  node-notifier@10.0.1:
+    resolution: {integrity: sha512-YX7TSyDukOZ0g+gmzjB6abKu+hTGvO8+8+gIFDsRCU2t8fLV/P2unmt+LGFaIa4y64aX98Qksa97rgz4vMNeLQ==}
 
   node-releases@2.0.53:
     resolution: {integrity: sha512-D9UOmYG3UH1V+ENW56t5QXBwJw1YEY18ruVeus89Rw+SyIgjPkCO84bRzO3uNIYosJbNwiabWVn48o3uJLjxFQ==}
@@ -5755,14 +5742,14 @@ snapshots:
       kew: 0.7.0
       plugin-error: 0.1.2
 
-  gulp-notify@4.0.0:
+  gulp-notify@5.0.0:
     dependencies:
       ansi-colors: 4.1.3
-      fancy-log: 1.3.3
-      lodash.template: 4.18.1
-      node-notifier: 9.0.1
+      fancy-log: 2.0.0
+      lodash: 4.18.1
+      node-notifier: 10.0.1
       node.extend: 2.0.3
-      plugin-error: 1.0.1
+      plugin-error: 2.0.1
       through2: 4.0.2
 
   gulp-nunjucks-render@2.2.3(chokidar@3.6.0):
@@ -6164,8 +6151,6 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  lodash._reinterpolate@3.0.0: {}
-
   lodash.assign@4.2.0: {}
 
   lodash.clonedeep@4.5.0: {}
@@ -6179,15 +6164,6 @@ snapshots:
   lodash.isobject@3.0.2: {}
 
   lodash.merge@4.6.2: {}
-
-  lodash.template@4.18.1:
-    dependencies:
-      lodash._reinterpolate: 3.0.0
-      lodash.templatesettings: 4.2.0
-
-  lodash.templatesettings@4.2.0:
-    dependencies:
-      lodash._reinterpolate: 3.0.0
 
   lodash.truncate@4.4.2: {}
 
@@ -6298,7 +6274,7 @@ snapshots:
   node-addon-api@7.1.1:
     optional: true
 
-  node-notifier@9.0.1:
+  node-notifier@10.0.1:
     dependencies:
       growly: 1.3.0
       is-wsl: 2.2.0
