@@ -110,9 +110,7 @@ const compileSass = () => {
     .src(paths_src.css, { sourcemaps: true })
     .pipe(compileScss())
     .pipe(csscomb())
-    .pipe(
-      postcss([tailwindcss(), autoprefixer()]),
-    )
+    .pipe(postcss([tailwindcss(), autoprefixer()]))
     .pipe(dest(paths_dist.css))
     .pipe(postcss([cssnanoPlugin()]))
     .pipe(rename({ suffix: '.min' }))
@@ -131,7 +129,9 @@ const html = () => {
 
   return gulp
     .src([paths_src.njk, '!' + paths_src.njktemp])
-    .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
+    .pipe(
+      plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }),
+    )
     .pipe(data(datafile))
     .pipe(
       nunjucksRender({
@@ -285,10 +285,7 @@ const syncFiles = (done) => {
     [paths_src.njk, paths_src.njktemp],
     series(compileSass, html, browserReload),
   );
-  gulp.watch(
-    paths_src.css,
-    series(lintSass, compileSass, html, browserReload),
-  );
+  gulp.watch(paths_src.css, series(lintSass, compileSass, html, browserReload));
   gulp.watch(paths_src.js, series(minifyScripts, browserReload));
   done();
 };
