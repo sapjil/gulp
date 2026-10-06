@@ -22,7 +22,6 @@ import concat from 'gulp-concat';
 import rename from 'gulp-rename';
 import jshint from 'gulp-jshint';
 import replace from 'gulp-replace';
-import uglify from 'gulp-uglify';
 import terser from 'gulp-terser';
 import sharp from 'sharp';
 import { Transform } from 'stream';
@@ -238,8 +237,7 @@ const minifyScripts = () => {
     .pipe(jshint.reporter('jshint-stylish'))
     .pipe(jshint.reporter('fail'))
     .pipe(dest(paths_dist.js))
-    .pipe(terser().on('error', (error) => console.log(error)))
-    .pipe(uglify())
+    .pipe(terser())
     .pipe(rename({ suffix: '.min' }))
     .pipe(sourcemaps.write('./maps'))
     .pipe(dest(paths_dist.js));
