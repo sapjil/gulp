@@ -17,6 +17,14 @@
 - **프로젝트별 교체 필요**: `src/html/_templates/_json/_sitedata.json`의 `base_url`(`localhost`)과 사용하지 않는 더미 값(`fbAppId`, `gtm` 등)을 프로젝트에 맞게 바꾸세요. `npx gulp sitemap`의 `siteUrl`(`gulpfile.js`)도 `https://sapjil.net`로 고정되어 있습니다.
 - **패키지 관리**: pnpm만 사용합니다.
 
+# 오프라인 설치 (`offline` 브랜치)
+
+인터넷이 없는 PC에서도 현재 패키지 버전 그대로 설치할 수 있도록 `offline-store/`를 포함한 브랜치입니다.
+
+- 설치: `pnpm run offline:install`, 그 다음 `npx gulp`
+- 락파일을 바꾼 뒤: `pnpm run offline:fetch`로 저장소를 다시 만들고 함께 커밋
+- **사용상 주의점(Node/pnpm 버전, 지원 플랫폼, Windows 경로와 줄바꿈 등)은 [OFFLINE.md](./OFFLINE.md)를 반드시 읽으세요.**
+
 # TODO
 
 - [x] gulp 5 업데이트

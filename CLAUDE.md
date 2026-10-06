@@ -64,6 +64,10 @@ When adding a new asset type or page, follow this same source→gulp-task→dist
 - `@babel/core`, `@babel/preset-env`, and `gulp-babel` were removed — they were unused devDependencies (no babel task ever existed in `gulpfile.js`) that only added dead attack surface (Dependabot alerts on transitive babel plugins). Don't re-add babel tooling unless a task actually needs to transpile JS.
 - `js-yaml`, `node-uuid`, and `ws` used to be direct devDependencies with loose `>=` ranges (all three added together in one old "Fix github security" commit) purely to nudge npm's resolver toward patched transitive copies — none were ever imported by our own code. They've been removed; the actual transitive copies (via `stylelint`/`cosmiconfig`, `csscomb`, and `browser-sync`/`socket.io` respectively) already resolve to safe versions on their own (or, for `node-uuid`, via the `pnpm-workspace.yaml` override). Don't re-add a top-level pin as a way to force a transitive version — use `pnpm-workspace.yaml`'s `overrides` instead.
 
+## `offline` branch
+
+`offline` is branched from `dev` and carries an `offline-store/` (pnpm content-addressable store built with `pnpm fetch`) so the exact locked packages install without network: `pnpm run offline:install`. Refresh it with `pnpm run offline:fetch` whenever `pnpm-lock.yaml` changes, and commit the `offline-store/` change together with the lockfile. Never merge the offline setup (`offline-store/`, `scripts/offline-fetch.mjs`, `.gitattributes`, `supportedArchitectures` in `pnpm-workspace.yaml`, `OFFLINE.md`) back into `dev`/`main`. Caveats (Node/pnpm versions, supported platforms, Windows path length and CRLF, no plain `pnpm install`) are in `OFFLINE.md`.
+
 ## Commit conventions
 
 A commit message template is configured via `.gitmessage.txt` (wired into `.git/config`'s `[commit] template`). Follow its type prefixes, matching the existing history: `Feat`, `Fix`, `Docs`, `Style`, `Design`, `Refactor`, `Rename`, `Remove`, `Test` — e.g. `Feat sitemap`, `Fix github security`. Commit bodies in this repo's history are written in Korean; match that convention unless the user asks otherwise.
