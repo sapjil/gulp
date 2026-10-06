@@ -182,7 +182,7 @@ const copyScript = () => {
 const copyImage = () => {
   return gulp
     .src(paths_src.image, { encoding: false })
-    .pipe(newer(paths_src.image, { encoding: false }))
+    .pipe(newer({ dest: paths_dist.image }))
     .pipe(dest(paths_dist.image));
 };
 export { copyImage };
