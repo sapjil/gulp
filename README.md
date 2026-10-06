@@ -2,6 +2,7 @@
 
 - 시작: `npx gulp`
 - HTML 생성 및 관리: `Nunjucks`
+- SCSS 린트: `npx gulp lintSass` (기본 작업에 포함, 오류 시 빌드 중단)
 - 이미지 압축: `npx gulp minimage`
 - SiteMap 생성: `npx gulp sitemap`
 
@@ -17,7 +18,6 @@
 - [x] sitemap 생성 적용
 - [x] csscomb 충돌 해결(생성된 css에서 tailwind 영역은 미처리)
 - [ ] markuplint 적용: 테스트중
-- [ ] yarn offline 패키지 설정
 
 # git config
 

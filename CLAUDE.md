@@ -32,17 +32,20 @@ Everything lives in one file, `gulpfile.js`. Source is `src/`, output is `dist/`
 | `copyFont` | `src/fonts/*` | `dist/common/fonts/` | Raw copy. |
 | `cacheBust` / `sitemap` | `dist/**/*.html` | `dist/` | Self-referential post-build passes; must run after `html`/full build, not part of default series. |
 
-Default task (`npx gulp`) = `series(copyFont, copyImage, copyScript, lintSass, compileSass, minifyScripts, html, syncFiles, watcher)`. `syncFiles` starts browser-sync serving `./dist` (unmatched routes 302 to `/404.html`) and wires `gulp.watch` for images/scss+njk/js back into the relevant task + reload.
+Default task (`npx gulp`) = `series(copyFont, copyImage, copyScript, lintSass, compileSass, minifyScripts, html, syncFiles)`. `syncFiles` starts browser-sync serving `./dist` (unmatched routes 302 to `/404.html`) and wires `gulp.watch` for images/scss+njk/js back into the relevant task + reload.
 
 When adding a new asset type or page, follow this same source→gulp-task→dist pattern rather than introducing a new build tool.
 
 ## Config quirks worth knowing before touching build config
 
+- `minifyScripts` merges `src/js/*.js` into `all.js` in file-path order (`sortByPath`); prefix filenames with `01_`, `02_` when order matters. `src/js/lib/` is never merged.
+- `browserslist` in `package.json` is `defaults, not dead` (no IE11); restore `ie >= 11` there if a project still needs it.
+- `html` renders Nunjucks with `autoescape: false` on purpose (trusted repo content, allows raw HTML in variables).
+- `src/js/lib/` jQuery: only `jquery-3.5.1.min.js` and jQuery UI 1.14.2 are kept; 1.x jQuery and UI 1.12.1 were removed for known XSS advisories. Check new bundles with `npm audit` (in a scratch dir) before adding.
+
 - Every task must `return` its gulp stream (or a promise). Calling `done()` right after starting a stream makes `series` proceed before the stream finishes and hides errors.
 
-- `.prettierignore` contains Next.js-specific entries (`.next`, `next.config.js`, etc.) — leftover from an unrelated template, not meaningful for this project. Don't treat it as a signal that this is a Next.js project.
-- `.stylestatsrc` exists but `stylestats` is not a devDependency and isn't wired into `gulpfile.js` — effectively vestigial.
-- `postcss.config.js` exists standalone but is not the config actually used during the gulp build (see `compileSass` above) — it's likely only consulted by editor tooling.
+- `postcss.config.js` (ESM `export default`) exists standalone but is not the config actually used during the gulp build (see `compileSass` above) — it's likely only consulted by editor tooling.
 - Tailwind's `content` globs `./src/html/**/*.{html,njk}`, so new Tailwind class usage must live under `src/html/`.
 - `gulpfile.js` does NOT use `gulp-sass` — it's stuck on Dart Sass's deprecated legacy JS API (`render`/`renderSync`) with no fixed release, so `compileScss` (in `gulpfile.js`) is a custom `Transform` calling `sass.compileString()` directly, feeding the result through `vinyl-sourcemaps-apply` for sourcemap compatibility. It also skips `_`-prefixed partial files, matching `gulp-sass`'s old behavior.
 - `src/scss/style.scss` uses `@use`, not `@import`, for its component partials — Sass requires `@use`/`@forward` to be the first statements in a file, so the three `@tailwind base/components/utilities;` directives that used to sit above the imports were moved into their own partial (`src/scss/components/_tailwind.scss`) and pulled in via `@use './components/tailwind';` as the *first* `@use` line, to preserve the original Tailwind-then-components cascade order. Keep new partials on `@use`/`@forward`, not `@import`.
