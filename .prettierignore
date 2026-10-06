@@ -1,10 +1,4 @@
-.next
-next-env.d.ts
-public
-next.config.js
-README.md
-Dockerfile
-.nvmrc
-.vscode
-.idea
-test.tsx
+node_modules
+dist
+pnpm-lock.yaml
+src/js/lib
