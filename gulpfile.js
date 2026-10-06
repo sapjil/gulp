@@ -22,7 +22,6 @@ import concat from 'gulp-concat';
 import rename from 'gulp-rename';
 import jshint from 'gulp-jshint';
 import replace from 'gulp-replace';
-import uglify from 'gulp-uglify';
 import terser from 'gulp-terser';
 import sharp from 'sharp';
 import { Transform } from 'stream';
@@ -93,25 +92,38 @@ const compileScss = () =>
     },
   });
 
-const compileSass = (done) => {
-  gulp
+const lintSass = async () => {
+  const result = await stylelint.lint({
+    files: paths_src.css,
+    formatter: 'string',
+  });
+  if (result.report) {
+    console.log(result.report);
+  }
+  if (result.errored) {
+    throw new Error('stylelint: SCSS 린트 오류가 있어 빌드를 중단합니다.');
+  }
+};
+export { lintSass };
+
+const compileSass = () => {
+  return gulp
     .src(paths_src.css)
     .pipe(sourcemaps.init())
     .pipe(compileScss())
     .pipe(csscomb())
     .pipe(
-      postcss([stylelint(), tailwindcss(), autoprefixer({ csscade: false })]),
+      postcss([tailwindcss(), autoprefixer()]),
     )
     .pipe(dest(paths_dist.css))
     .pipe(postcss([cssnanoPlugin()]))
     .pipe(rename({ suffix: '.min' }))
-    .pipe(dest(paths_dist.css))
-    .pipe(sourcemaps.write('./maps'));
-  done();
+    .pipe(sourcemaps.write('./maps'))
+    .pipe(dest(paths_dist.css));
 };
 export { compileSass };
 
-const html = (done) => {
+const html = () => {
   const siteDataJson = JSON.parse(
     fs.readFileSync('./src/html/_templates/_json/_sitedata.json'),
   );
@@ -120,7 +132,7 @@ const html = (done) => {
     return json_all;
   };
 
-  gulp
+  return gulp
     .src([paths_src.njk, '!' + paths_src.njktemp])
     .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
     .pipe(data(datafile))
@@ -147,35 +159,30 @@ const html = (done) => {
     )
     .pipe(cached('html'))
     .pipe(gulp.dest('./dist/'));
-  done();
 };
 export { html };
 
-const cacheBust = (done) => {
-  gulp
+const cacheBust = () => {
+  return gulp
     .src(paths_src.cach)
     .pipe(replace(/cache_bust=\d+/g, 'cache_bust=' + new Date().getTime()))
     .pipe(dest(paths_dist.cach));
-  done();
 };
 export { cacheBust };
 
-const copyFont = (done) => {
-  gulp.src(paths_src.font).pipe(dest(paths_dist.font));
-  done();
+const copyFont = () => {
+  return gulp.src(paths_src.font).pipe(dest(paths_dist.font));
 };
 
-const copyScript = (done) => {
-  gulp.src(paths_src.jslib).pipe(dest(paths_dist.jslib));
-  done();
+const copyScript = () => {
+  return gulp.src(paths_src.jslib).pipe(dest(paths_dist.jslib));
 };
 
-const copyImage = (done) => {
-  gulp
+const copyImage = () => {
+  return gulp
     .src(paths_src.image, { encoding: false })
-    .pipe(newer(paths_src.image, { encoding: false }))
+    .pipe(newer({ dest: paths_dist.image }))
     .pipe(dest(paths_dist.image));
-  done();
 };
 export { copyImage };
 
@@ -213,30 +220,47 @@ const compressImage = () =>
     },
   });
 
-const minimage = (done) => {
-  gulp
+const minimage = () => {
+  return gulp
     .src(paths_src.image, { encoding: false })
     .pipe(compressImage())
     .pipe(dest(paths_dist.image));
-  done();
 };
 export { minimage };
 
-const minifyScripts = (done) => {
-  gulp
+// glob 결과 순서는 보장되지 않으므로 파일 경로 순으로 정렬해 병합 순서를 고정한다.
+// 순서가 중요한 파일은 01_, 02_ 처럼 숫자 접두어를 붙인다.
+const sortByPath = () => {
+  const files = [];
+  return new Transform({
+    objectMode: true,
+    transform(file, _enc, callback) {
+      files.push(file);
+      callback();
+    },
+    flush(callback) {
+      files
+        .sort((a, b) => a.path.localeCompare(b.path))
+        .forEach((file) => this.push(file));
+      callback();
+    },
+  });
+};
+
+const minifyScripts = () => {
+  return gulp
     .src(paths_src.js)
+    .pipe(sortByPath())
     .pipe(sourcemaps.init())
     .pipe(concat('all.js'))
     .pipe(jshint())
     .pipe(jshint.reporter('jshint-stylish'))
     .pipe(jshint.reporter('fail'))
     .pipe(dest(paths_dist.js))
-    .pipe(terser().on('error', (error) => console.log(error)))
-    .pipe(uglify())
+    .pipe(terser())
     .pipe(rename({ suffix: '.min' }))
     .pipe(sourcemaps.write('./maps'))
     .pipe(dest(paths_dist.js));
-  done();
 };
 export { minifyScripts };
 
@@ -263,16 +287,20 @@ const syncFiles = (done) => {
   );
   gulp.watch(paths_src.image, series(copyImage, browserReload));
   gulp.watch(
-    [paths_src.njk, paths_src.njktemp, paths_src.css],
+    [paths_src.njk, paths_src.njktemp],
     series(compileSass, html, browserReload),
+  );
+  gulp.watch(
+    paths_src.css,
+    series(lintSass, compileSass, html, browserReload),
   );
   gulp.watch(paths_src.js, series(minifyScripts, browserReload));
   done();
 };
 export { syncFiles };
 
-const sitemap = (done) => {
-  gulp
+const sitemap = () => {
+  return gulp
     .src('./dist/**/*.html', { read: false })
     .pipe(
       generatemap({
@@ -280,23 +308,16 @@ const sitemap = (done) => {
       }),
     )
     .pipe(dest('./dist'));
-  done();
 };
 export { sitemap };
-
-const watcher = (done) => {
-  // watch(paths_src.image, copyImage);
-  done();
-};
-export { watcher };
 
 export default series(
   copyFont,
   copyImage,
   copyScript,
+  lintSass,
   compileSass,
   minifyScripts,
   html,
   syncFiles,
-  watcher,
 );

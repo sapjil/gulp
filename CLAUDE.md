@@ -23,23 +23,37 @@ Everything lives in one file, `gulpfile.js`. Source is `src/`, output is `dist/`
 
 | Task | Source | Destination | Notes |
 |---|---|---|---|
-| `compileSass` | `src/scss/**/*.scss` | `dist/common/css/` (+ `.min.css`) | Pipeline: sourcemaps init → `compileScss` (custom `Transform` calling modern `sass.compileString()` directly, not `gulp-sass` — see below) → `csscomb` (property ordering, see `.csscomb.json`) → `postcss([stylelint, tailwindcss, autoprefixer])` → write unminified → `postcss([cssnano])` (via `gulp-postcss` + the plain `cssnano` package, not `gulp-cssnano`) → write `.min.css`. Note `postcss.config.js` is NOT used by this task; the gulp pipeline builds its own PostCSS plugin array inline. Note `sourcemaps.write('./maps')` runs after both `dest()` calls with no `dest()` following it, so `.map` files are never actually persisted to disk — a pre-existing pipeline bug, not something introduced by the sass migration below. |
+| `compileSass` | `src/scss/**/*.scss` | `dist/common/css/` (+ `.min.css`, map in `dist/common/css/maps`) | Pipeline: sourcemaps init → `compileScss` (custom `Transform` calling modern `sass.compileString()` directly, not `gulp-sass` — see below) → `csscomb` (property ordering, see `.csscomb.json`) → `postcss([tailwindcss, autoprefixer])` → write unminified `.css` (no map) → `postcss([cssnano])` (via `gulp-postcss` + the plain `cssnano` package, not `gulp-cssnano`) → rename `.min.css` → `sourcemaps.write('./maps')` → write `.min.css` + map. Stylelint is NOT in this PostCSS chain anymore (see `lintSass`). Note `postcss.config.js` is NOT used by this task; the gulp pipeline builds its own PostCSS plugin array inline. |
+| `lintSass` | `src/scss/**/*.scss` | (none) | Runs stylelint on the SCSS sources via its Node API, prints the report, and fails the task on any error (so the default build stops). Empty placeholder partials are allowed (`block-no-empty`, `no-empty-source` are off in `.stylelintrc.json`). Also run before `compileSass` in the scss watcher. |
 | `html` | `src/html/pages/**/*.njk` (excludes `_templates`) | `dist/*.html` (flat) | Data comes from `src/html/_templates/_json/_sitedata.json`. Nunjucks include path is `src/html/_templates`. Also runs `htmlhint` and `gulp-pretty-html`. |
-| `copyImage` / `minimage` | `src/images/**/*` | `dist/common/images/` | `copyImage` is a plain newer-only copy (used in the default series); `minimage` additionally runs `sharp`-based compression for jpg/jpeg/png via the `compressImage` transform. |
-| `minifyScripts` | `src/js/*.js` (top-level only, not `lib/`) | `dist/common/js/` (+ `.min.js`, maps in `dist/common/js/maps`) | Concats all top-level scripts into `all.js`, runs `jshint` (build fails on lint errors — see `.jshintrc`), then terser+uglify for the `.min.js`. |
+| `copyImage` / `minimage` | `src/images/**/*` | `dist/common/images/` | `copyImage` is a plain copy of files newer than `dist/common/images/` (`newer({ dest })`) (used in the default series); `minimage` additionally runs `sharp`-based compression for jpg/jpeg/png via the `compressImage` transform. |
+| `minifyScripts` | `src/js/*.js` (top-level only, not `lib/`) | `dist/common/js/` (+ `.min.js`, maps in `dist/common/js/maps`) | Concats all top-level scripts into `all.js`, runs `jshint` (build fails on lint errors — see `.jshintrc`), then terser for the `.min.js` (terser errors fail the task). |
 | `copyScript` | `src/js/lib/**/*` | `dist/common/js/lib/` | Raw copy, no processing — third-party bundles (jQuery, Swiper, Chart.js, AOS, etc). |
 | `copyFont` | `src/fonts/*` | `dist/common/fonts/` | Raw copy. |
 | `cacheBust` / `sitemap` | `dist/**/*.html` | `dist/` | Self-referential post-build passes; must run after `html`/full build, not part of default series. |
 
-Default task (`npx gulp`) = `series(copyFont, copyImage, copyScript, compileSass, minifyScripts, html, syncFiles, watcher)`. `syncFiles` starts browser-sync serving `./dist` (unmatched routes 302 to `/404.html`) and wires `gulp.watch` for images/scss+njk/js back into the relevant task + reload.
+Default task (`npx gulp`) = `series(copyFont, copyImage, copyScript, lintSass, compileSass, minifyScripts, html, syncFiles)`. `syncFiles` starts browser-sync serving `./dist` (unmatched routes 302 to `/404.html`) and wires `gulp.watch` for images/scss+njk/js back into the relevant task + reload.
 
 When adding a new asset type or page, follow this same source→gulp-task→dist pattern rather than introducing a new build tool.
 
+## Project policies (deliberate decisions — don't revert without asking)
+
+- **Browser support**: `browserslist` in `package.json` is `defaults, not dead`. IE11 and Android 4 are NOT supported; autoprefixer no longer emits `-ms-` / old `-webkit-` prefixes. A project that still needs them must add `ie >= 11` / `Android >= 4` back to `browserslist` and rebuild.
+- **Lint fails the build**: `lintSass` (stylelint) and `jshint` errors stop the build; they are not warnings. Empty placeholder SCSS partials are allowed (`block-no-empty`, `no-empty-source` are off in `.stylelintrc.json`).
+- **Task contract**: every gulp task returns its stream/promise (see quirks below); never go back to `done()`-immediately tasks.
+- **Nunjucks `autoescape: false`**: intentional (trusted repo content, raw HTML allowed in variables). Never feed untrusted/external input into templates.
+- **Third-party libs (`src/js/lib/`)**: only versions without known advisories are kept. jQuery: `jquery-3.5.1.min.js` only (1.x removed); jQuery UI: 1.14.2 full build (1.12.1 removed). Check any new or upgraded bundle with `npm audit` in a scratch dir before adding it.
+- **Tailwind breakpoints**: `tailwind.config.js` overrides `theme.screens` with `sm 480 / md 768 / lg 976 / xl 1440`; the default `2xl` does not exist.
+- **Placeholder site data**: `_sitedata.json` keys `fbAppId`, `fbAdmins`, `gtm`, `twitterSite`, `optImage` are unused by the templates, and `base_url` (`localhost`) is rendered into `<base href>`. Replace them per project.
+- **Dependency policy**: pnpm only; transitive CVEs are handled via `pnpm-workspace.yaml` `overrides`, not by adding top-level pins.
+
 ## Config quirks worth knowing before touching build config
 
-- `.prettierignore` contains Next.js-specific entries (`.next`, `next.config.js`, etc.) — leftover from an unrelated template, not meaningful for this project. Don't treat it as a signal that this is a Next.js project.
-- `.stylestatsrc` exists but `stylestats` is not a devDependency and isn't wired into `gulpfile.js` — effectively vestigial.
-- `postcss.config.js` exists standalone but is not the config actually used during the gulp build (see `compileSass` above) — it's likely only consulted by editor tooling.
+- `minifyScripts` merges `src/js/*.js` into `all.js` in file-path order (`sortByPath`); prefix filenames with `01_`, `02_` when order matters. `src/js/lib/` is never merged.
+
+- Every task must `return` its gulp stream (or a promise). Calling `done()` right after starting a stream makes `series` proceed before the stream finishes and hides errors.
+
+- `postcss.config.js` (ESM `export default`) exists standalone but is not the config actually used during the gulp build (see `compileSass` above) — it's likely only consulted by editor tooling.
 - Tailwind's `content` globs `./src/html/**/*.{html,njk}`, so new Tailwind class usage must live under `src/html/`.
 - `gulpfile.js` does NOT use `gulp-sass` — it's stuck on Dart Sass's deprecated legacy JS API (`render`/`renderSync`) with no fixed release, so `compileScss` (in `gulpfile.js`) is a custom `Transform` calling `sass.compileString()` directly, feeding the result through `vinyl-sourcemaps-apply` for sourcemap compatibility. It also skips `_`-prefixed partial files, matching `gulp-sass`'s old behavior.
 - `src/scss/style.scss` uses `@use`, not `@import`, for its component partials — Sass requires `@use`/`@forward` to be the first statements in a file, so the three `@tailwind base/components/utilities;` directives that used to sit above the imports were moved into their own partial (`src/scss/components/_tailwind.scss`) and pulled in via `@use './components/tailwind';` as the *first* `@use` line, to preserve the original Tailwind-then-components cascade order. Keep new partials on `@use`/`@forward`, not `@import`.

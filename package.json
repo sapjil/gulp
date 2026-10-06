@@ -2,7 +2,6 @@
   "name": "gulp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,15 +10,13 @@
   "author": "",
   "license": "ISC",
   "browserslist": [
-    "last 2 versions",
-    "ie >= 11",
-    "Android >= 4"
+    "defaults",
+    "not dead"
   ],
   "devDependencies": {
     "autoprefixer": "^10.4.19",
     "browser-sync": "^3.0.2",
     "cssnano": "^8.0.4",
-    "fs": "^0.0.1-security",
     "gulp": "^5.0.0",
     "gulp-cached": "^1.1.1",
     "gulp-concat": "^2.6.1",
@@ -32,14 +29,12 @@
     "gulp-nunjucks-render": "^2.2.3",
     "gulp-plumber": "^1.2.1",
     "gulp-postcss": "^10.0.0",
-    "gulp-prettier": "^6.0.0",
     "gulp-pretty-html": "^2.0.10",
     "gulp-rename": "^2.0.0",
     "gulp-replace": "^1.1.4",
     "gulp-sitemap": "^8.0.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.1.0",
-    "gulp-uglify": "^3.0.2",
     "jshint": "^2.13.6",
     "jshint-stylish": "^2.2.1",
     "prettier": "^3.2.5",
