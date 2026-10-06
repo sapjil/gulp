@@ -228,9 +228,29 @@ const minimage = () => {
 };
 export { minimage };
 
+// glob 결과 순서는 보장되지 않으므로 파일 경로 순으로 정렬해 병합 순서를 고정한다.
+// 순서가 중요한 파일은 01_, 02_ 처럼 숫자 접두어를 붙인다.
+const sortByPath = () => {
+  const files = [];
+  return new Transform({
+    objectMode: true,
+    transform(file, _enc, callback) {
+      files.push(file);
+      callback();
+    },
+    flush(callback) {
+      files
+        .sort((a, b) => a.path.localeCompare(b.path))
+        .forEach((file) => this.push(file));
+      callback();
+    },
+  });
+};
+
 const minifyScripts = () => {
   return gulp
     .src(paths_src.js)
+    .pipe(sortByPath())
     .pipe(sourcemaps.init())
     .pipe(concat('all.js'))
     .pipe(jshint())
