@@ -23,19 +23,22 @@ Everything lives in one file, `gulpfile.js`. Source is `src/`, output is `dist/`
 
 | Task | Source | Destination | Notes |
 |---|---|---|---|
-| `compileSass` | `src/scss/**/*.scss` | `dist/common/css/` (+ `.min.css`) | Pipeline: sourcemaps init → `compileScss` (custom `Transform` calling modern `sass.compileString()` directly, not `gulp-sass` — see below) → `csscomb` (property ordering, see `.csscomb.json`) → `postcss([stylelint, tailwindcss, autoprefixer])` → write unminified → `postcss([cssnano])` (via `gulp-postcss` + the plain `cssnano` package, not `gulp-cssnano`) → write `.min.css`. Note `postcss.config.js` is NOT used by this task; the gulp pipeline builds its own PostCSS plugin array inline. Note `sourcemaps.write('./maps')` runs after both `dest()` calls with no `dest()` following it, so `.map` files are never actually persisted to disk — a pre-existing pipeline bug, not something introduced by the sass migration below. |
+| `compileSass` | `src/scss/**/*.scss` | `dist/common/css/` (+ `.min.css`, map in `dist/common/css/maps`) | Pipeline: sourcemaps init → `compileScss` (custom `Transform` calling modern `sass.compileString()` directly, not `gulp-sass` — see below) → `csscomb` (property ordering, see `.csscomb.json`) → `postcss([tailwindcss, autoprefixer])` → write unminified `.css` (no map) → `postcss([cssnano])` (via `gulp-postcss` + the plain `cssnano` package, not `gulp-cssnano`) → rename `.min.css` → `sourcemaps.write('./maps')` → write `.min.css` + map. Stylelint is NOT in this PostCSS chain anymore (see `lintSass`). Note `postcss.config.js` is NOT used by this task; the gulp pipeline builds its own PostCSS plugin array inline. |
+| `lintSass` | `src/scss/**/*.scss` | (none) | Runs stylelint on the SCSS sources via its Node API, prints the report, and fails the task on any error (so the default build stops). Empty placeholder partials are allowed (`block-no-empty`, `no-empty-source` are off in `.stylelintrc.json`). Also run before `compileSass` in the scss watcher. |
 | `html` | `src/html/pages/**/*.njk` (excludes `_templates`) | `dist/*.html` (flat) | Data comes from `src/html/_templates/_json/_sitedata.json`. Nunjucks include path is `src/html/_templates`. Also runs `htmlhint` and `gulp-pretty-html`. |
-| `copyImage` / `minimage` | `src/images/**/*` | `dist/common/images/` | `copyImage` is a plain newer-only copy (used in the default series); `minimage` additionally runs `sharp`-based compression for jpg/jpeg/png via the `compressImage` transform. |
+| `copyImage` / `minimage` | `src/images/**/*` | `dist/common/images/` | `copyImage` is a plain copy of files newer than `dist/common/images/` (`newer({ dest })`) (used in the default series); `minimage` additionally runs `sharp`-based compression for jpg/jpeg/png via the `compressImage` transform. |
 | `minifyScripts` | `src/js/*.js` (top-level only, not `lib/`) | `dist/common/js/` (+ `.min.js`, maps in `dist/common/js/maps`) | Concats all top-level scripts into `all.js`, runs `jshint` (build fails on lint errors — see `.jshintrc`), then terser for the `.min.js` (terser errors fail the task). |
 | `copyScript` | `src/js/lib/**/*` | `dist/common/js/lib/` | Raw copy, no processing — third-party bundles (jQuery, Swiper, Chart.js, AOS, etc). |
 | `copyFont` | `src/fonts/*` | `dist/common/fonts/` | Raw copy. |
 | `cacheBust` / `sitemap` | `dist/**/*.html` | `dist/` | Self-referential post-build passes; must run after `html`/full build, not part of default series. |
 
-Default task (`npx gulp`) = `series(copyFont, copyImage, copyScript, compileSass, minifyScripts, html, syncFiles, watcher)`. `syncFiles` starts browser-sync serving `./dist` (unmatched routes 302 to `/404.html`) and wires `gulp.watch` for images/scss+njk/js back into the relevant task + reload.
+Default task (`npx gulp`) = `series(copyFont, copyImage, copyScript, lintSass, compileSass, minifyScripts, html, syncFiles, watcher)`. `syncFiles` starts browser-sync serving `./dist` (unmatched routes 302 to `/404.html`) and wires `gulp.watch` for images/scss+njk/js back into the relevant task + reload.
 
 When adding a new asset type or page, follow this same source→gulp-task→dist pattern rather than introducing a new build tool.
 
 ## Config quirks worth knowing before touching build config
+
+- Every task must `return` its gulp stream (or a promise). Calling `done()` right after starting a stream makes `series` proceed before the stream finishes and hides errors.
 
 - `.prettierignore` contains Next.js-specific entries (`.next`, `next.config.js`, etc.) — leftover from an unrelated template, not meaningful for this project. Don't treat it as a signal that this is a Next.js project.
 - `.stylestatsrc` exists but `stylestats` is not a devDependency and isn't wired into `gulpfile.js` — effectively vestigial.
