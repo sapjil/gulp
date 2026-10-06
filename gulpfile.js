@@ -105,8 +105,8 @@ const compileSass = () => {
     .pipe(dest(paths_dist.css))
     .pipe(postcss([cssnanoPlugin()]))
     .pipe(rename({ suffix: '.min' }))
-    .pipe(dest(paths_dist.css))
-    .pipe(sourcemaps.write('./maps'));
+    .pipe(sourcemaps.write('./maps'))
+    .pipe(dest(paths_dist.css));
 };
 export { compileSass };
 
