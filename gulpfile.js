@@ -311,12 +311,6 @@ const sitemap = () => {
 };
 export { sitemap };
 
-const watcher = (done) => {
-  // watch(paths_src.image, copyImage);
-  done();
-};
-export { watcher };
-
 export default series(
   copyFont,
   copyImage,
@@ -326,5 +320,4 @@ export default series(
   minifyScripts,
   html,
   syncFiles,
-  watcher,
 );
