@@ -36,12 +36,20 @@ Default task (`npx gulp`) = `series(copyFont, copyImage, copyScript, lintSass, c
 
 When adding a new asset type or page, follow this same source→gulp-task→dist pattern rather than introducing a new build tool.
 
+## Project policies (deliberate decisions — don't revert without asking)
+
+- **Browser support**: `browserslist` in `package.json` is `defaults, not dead`. IE11 and Android 4 are NOT supported; autoprefixer no longer emits `-ms-` / old `-webkit-` prefixes. A project that still needs them must add `ie >= 11` / `Android >= 4` back to `browserslist` and rebuild.
+- **Lint fails the build**: `lintSass` (stylelint) and `jshint` errors stop the build; they are not warnings. Empty placeholder SCSS partials are allowed (`block-no-empty`, `no-empty-source` are off in `.stylelintrc.json`).
+- **Task contract**: every gulp task returns its stream/promise (see quirks below); never go back to `done()`-immediately tasks.
+- **Nunjucks `autoescape: false`**: intentional (trusted repo content, raw HTML allowed in variables). Never feed untrusted/external input into templates.
+- **Third-party libs (`src/js/lib/`)**: only versions without known advisories are kept. jQuery: `jquery-3.5.1.min.js` only (1.x removed); jQuery UI: 1.14.2 full build (1.12.1 removed). Check any new or upgraded bundle with `npm audit` in a scratch dir before adding it.
+- **Tailwind breakpoints**: `tailwind.config.js` overrides `theme.screens` with `sm 480 / md 768 / lg 976 / xl 1440`; the default `2xl` does not exist.
+- **Placeholder site data**: `_sitedata.json` keys `fbAppId`, `fbAdmins`, `gtm`, `twitterSite`, `optImage` are unused by the templates, and `base_url` (`localhost`) is rendered into `<base href>`. Replace them per project.
+- **Dependency policy**: pnpm only; transitive CVEs are handled via `pnpm-workspace.yaml` `overrides`, not by adding top-level pins.
+
 ## Config quirks worth knowing before touching build config
 
 - `minifyScripts` merges `src/js/*.js` into `all.js` in file-path order (`sortByPath`); prefix filenames with `01_`, `02_` when order matters. `src/js/lib/` is never merged.
-- `browserslist` in `package.json` is `defaults, not dead` (no IE11); restore `ie >= 11` there if a project still needs it.
-- `html` renders Nunjucks with `autoescape: false` on purpose (trusted repo content, allows raw HTML in variables).
-- `src/js/lib/` jQuery: only `jquery-3.5.1.min.js` and jQuery UI 1.14.2 are kept; 1.x jQuery and UI 1.12.1 were removed for known XSS advisories. Check new bundles with `npm audit` (in a scratch dir) before adding.
 
 - Every task must `return` its gulp stream (or a promise). Calling `done()` right after starting a stream makes `series` proceed before the stream finishes and hides errors.
 
