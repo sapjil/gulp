@@ -114,7 +114,7 @@ const compileSass = () => {
     .pipe(compileScss())
     .pipe(csscomb())
     .pipe(
-      postcss([tailwindcss(), autoprefixer({ csscade: false })]),
+      postcss([tailwindcss(), autoprefixer()]),
     )
     .pipe(dest(paths_dist.css))
     .pipe(postcss([cssnanoPlugin()]))
