@@ -93,8 +93,8 @@ const compileScss = () =>
     },
   });
 
-const compileSass = (done) => {
-  gulp
+const compileSass = () => {
+  return gulp
     .src(paths_src.css)
     .pipe(sourcemaps.init())
     .pipe(compileScss())
@@ -107,11 +107,10 @@ const compileSass = (done) => {
     .pipe(rename({ suffix: '.min' }))
     .pipe(dest(paths_dist.css))
     .pipe(sourcemaps.write('./maps'));
-  done();
 };
 export { compileSass };
 
-const html = (done) => {
+const html = () => {
   const siteDataJson = JSON.parse(
     fs.readFileSync('./src/html/_templates/_json/_sitedata.json'),
   );
@@ -120,7 +119,7 @@ const html = (done) => {
     return json_all;
   };
 
-  gulp
+  return gulp
     .src([paths_src.njk, '!' + paths_src.njktemp])
     .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
     .pipe(data(datafile))
@@ -147,35 +146,30 @@ const html = (done) => {
     )
     .pipe(cached('html'))
     .pipe(gulp.dest('./dist/'));
-  done();
 };
 export { html };
 
-const cacheBust = (done) => {
-  gulp
+const cacheBust = () => {
+  return gulp
     .src(paths_src.cach)
     .pipe(replace(/cache_bust=\d+/g, 'cache_bust=' + new Date().getTime()))
     .pipe(dest(paths_dist.cach));
-  done();
 };
 export { cacheBust };
 
-const copyFont = (done) => {
-  gulp.src(paths_src.font).pipe(dest(paths_dist.font));
-  done();
+const copyFont = () => {
+  return gulp.src(paths_src.font).pipe(dest(paths_dist.font));
 };
 
-const copyScript = (done) => {
-  gulp.src(paths_src.jslib).pipe(dest(paths_dist.jslib));
-  done();
+const copyScript = () => {
+  return gulp.src(paths_src.jslib).pipe(dest(paths_dist.jslib));
 };
 
-const copyImage = (done) => {
-  gulp
+const copyImage = () => {
+  return gulp
     .src(paths_src.image, { encoding: false })
     .pipe(newer(paths_src.image, { encoding: false }))
     .pipe(dest(paths_dist.image));
-  done();
 };
 export { copyImage };
 
@@ -213,17 +207,16 @@ const compressImage = () =>
     },
   });
 
-const minimage = (done) => {
-  gulp
+const minimage = () => {
+  return gulp
     .src(paths_src.image, { encoding: false })
     .pipe(compressImage())
     .pipe(dest(paths_dist.image));
-  done();
 };
 export { minimage };
 
-const minifyScripts = (done) => {
-  gulp
+const minifyScripts = () => {
+  return gulp
     .src(paths_src.js)
     .pipe(sourcemaps.init())
     .pipe(concat('all.js'))
@@ -236,7 +229,6 @@ const minifyScripts = (done) => {
     .pipe(rename({ suffix: '.min' }))
     .pipe(sourcemaps.write('./maps'))
     .pipe(dest(paths_dist.js));
-  done();
 };
 export { minifyScripts };
 
@@ -271,8 +263,8 @@ const syncFiles = (done) => {
 };
 export { syncFiles };
 
-const sitemap = (done) => {
-  gulp
+const sitemap = () => {
+  return gulp
     .src('./dist/**/*.html', { read: false })
     .pipe(
       generatemap({
@@ -280,7 +272,6 @@ const sitemap = (done) => {
       }),
     )
     .pipe(dest('./dist'));
-  done();
 };
 export { sitemap };
 
