@@ -1,0 +1,2 @@
+# pnpm 저장소 파일은 해시로 무결성을 검사하므로 줄바꿈 변환을 막는다 (Windows autocrlf 대비)
+offline-store/** -text -diff
