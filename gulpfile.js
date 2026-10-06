@@ -1,7 +1,6 @@
 import gulp from 'gulp';
 import { dest, watch, series } from 'gulp';
 import * as sass from 'sass';
-import sourcemaps from 'gulp-sourcemaps';
 import applySourceMap from 'vinyl-sourcemaps-apply';
 import { pathToFileURL, fileURLToPath } from 'url';
 import cssnanoPlugin from 'cssnano';
@@ -108,8 +107,7 @@ export { lintSass };
 
 const compileSass = () => {
   return gulp
-    .src(paths_src.css)
-    .pipe(sourcemaps.init())
+    .src(paths_src.css, { sourcemaps: true })
     .pipe(compileScss())
     .pipe(csscomb())
     .pipe(
@@ -118,8 +116,7 @@ const compileSass = () => {
     .pipe(dest(paths_dist.css))
     .pipe(postcss([cssnanoPlugin()]))
     .pipe(rename({ suffix: '.min' }))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(dest(paths_dist.css));
+    .pipe(dest(paths_dist.css, { sourcemaps: 'maps' }));
 };
 export { compileSass };
 
@@ -249,9 +246,8 @@ const sortByPath = () => {
 
 const minifyScripts = () => {
   return gulp
-    .src(paths_src.js)
+    .src(paths_src.js, { sourcemaps: true })
     .pipe(sortByPath())
-    .pipe(sourcemaps.init())
     .pipe(concat('all.js'))
     .pipe(jshint())
     .pipe(jshint.reporter('jshint-stylish'))
@@ -259,8 +255,7 @@ const minifyScripts = () => {
     .pipe(dest(paths_dist.js))
     .pipe(terser())
     .pipe(rename({ suffix: '.min' }))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(dest(paths_dist.js));
+    .pipe(dest(paths_dist.js, { sourcemaps: 'maps' }));
 };
 export { minifyScripts };
 
