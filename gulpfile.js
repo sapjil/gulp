@@ -1,14 +1,13 @@
 import gulp from 'gulp';
 import { dest, watch, series } from 'gulp';
-import gulpSass from 'gulp-sass';
-import sassCompiler from 'sass';
-import sourcemaps from 'gulp-sourcemaps';
-import cssnano from 'gulp-cssnano';
+import * as sass from 'sass';
+import applySourceMap from 'vinyl-sourcemaps-apply';
+import { pathToFileURL, fileURLToPath } from 'url';
+import cssnanoPlugin from 'cssnano';
 import postcss from 'gulp-postcss';
 import autoprefixer from 'autoprefixer';
 import csscomb from 'gulp-csscomb';
 import stylelint from 'stylelint';
-const sass = gulpSass(sassCompiler);
 import browserSync from 'browser-sync';
 import prettyHtml from 'gulp-pretty-html';
 import nunjucksRender from 'gulp-nunjucks-render';
@@ -22,9 +21,10 @@ import concat from 'gulp-concat';
 import rename from 'gulp-rename';
 import jshint from 'gulp-jshint';
 import replace from 'gulp-replace';
-import uglify from 'gulp-uglify';
 import terser from 'gulp-terser';
-import imagemin, { gifsicle, mozjpeg, optipng, svgo } from 'gulp-imagemin';
+import sharp from 'sharp';
+import { Transform } from 'stream';
+import path from 'path';
 import newer from 'gulp-newer';
 import tailwindcss from 'tailwindcss';
 import generatemap from 'gulp-sitemap';
@@ -50,24 +50,75 @@ const paths_dist = {
   cach: './dist/',
 };
 
-const compileSass = (done) => {
-  gulp
-    .src(paths_src.css)
-    .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
+const compileScss = () =>
+  new Transform({
+    objectMode: true,
+    transform(file, _enc, callback) {
+      if (file.isNull() || path.basename(file.path).startsWith('_')) {
+        return callback();
+      }
+      if (file.isStream()) {
+        return callback(new Error('Streaming not supported'));
+      }
+      try {
+        const result = sass.compileString(file.contents.toString(), {
+          url: pathToFileURL(file.path),
+          loadPaths: [path.dirname(file.path)],
+          sourceMap: !!file.sourceMap,
+          sourceMapIncludeSources: true,
+        });
+        if (file.sourceMap && result.sourceMap) {
+          const sourceMap = result.sourceMap;
+          sourceMap.file = path.basename(file.path, '.scss') + '.css';
+          sourceMap.sources = sourceMap.sources.map((src) =>
+            path
+              .relative(path.dirname(file.path), fileURLToPath(src))
+              .split(path.sep)
+              .join('/'),
+          );
+          applySourceMap(file, sourceMap);
+        }
+        file.contents = Buffer.from(result.css);
+        file.path = path.join(
+          path.dirname(file.path),
+          path.basename(file.path, '.scss') + '.css',
+        );
+        callback(null, file);
+      } catch (error) {
+        console.error(`[sass] ${file.path}\n${error.message}`);
+        callback();
+      }
+    },
+  });
+
+const lintSass = async () => {
+  const result = await stylelint.lint({
+    files: paths_src.css,
+    formatter: 'string',
+  });
+  if (result.report) {
+    console.log(result.report);
+  }
+  if (result.errored) {
+    throw new Error('stylelint: SCSS 린트 오류가 있어 빌드를 중단합니다.');
+  }
+};
+export { lintSass };
+
+const compileSass = () => {
+  return gulp
+    .src(paths_src.css, { sourcemaps: true })
+    .pipe(compileScss())
     .pipe(csscomb())
-    // tailwindcss option: tailwindcss()
-    .pipe(postcss([stylelint(), autoprefixer({ csscade: false })]))
+    .pipe(postcss([tailwindcss(), autoprefixer()]))
     .pipe(dest(paths_dist.css))
-    .pipe(cssnano())
+    .pipe(postcss([cssnanoPlugin()]))
     .pipe(rename({ suffix: '.min' }))
-    .pipe(dest(paths_dist.css))
-    .pipe(sourcemaps.write('./maps'));
-  done();
+    .pipe(dest(paths_dist.css, { sourcemaps: 'maps' }));
 };
 export { compileSass };
 
-const html = (done) => {
+const html = () => {
   const siteDataJson = JSON.parse(
     fs.readFileSync('./src/html/_templates/_json/_sitedata.json'),
   );
@@ -75,14 +126,11 @@ const html = (done) => {
   const datafile = () => {
     return json_all;
   };
-  gulp
+
+  return gulp
     .src([paths_src.njk, '!' + paths_src.njktemp])
     .pipe(
-      plumber({
-        errorHandler: notify.onError(
-          '<%== error.message %>, <%== file.relative %>',
-        ),
-      }),
+      plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }),
     )
     .pipe(data(datafile))
     .pipe(
@@ -108,83 +156,106 @@ const html = (done) => {
     )
     .pipe(cached('html'))
     .pipe(gulp.dest('./dist/'));
-  done();
 };
 export { html };
 
-const cacheBust = (done) => {
-  gulp
+const cacheBust = () => {
+  return gulp
     .src(paths_src.cach)
     .pipe(replace(/cache_bust=\d+/g, 'cache_bust=' + new Date().getTime()))
     .pipe(dest(paths_dist.cach));
-  done();
 };
 export { cacheBust };
 
-const copyFont = (done) => {
-  gulp.src(paths_src.font).pipe(dest(paths_dist.font));
-  done();
+const copyFont = () => {
+  return gulp.src(paths_src.font).pipe(dest(paths_dist.font));
 };
 
-const copyScript = (done) => {
-  gulp.src(paths_src.jslib).pipe(dest(paths_dist.jslib));
-  done();
+const copyScript = () => {
+  return gulp.src(paths_src.jslib).pipe(dest(paths_dist.jslib));
 };
 
-const copyImage = (done) => {
-  gulp
+const copyImage = () => {
+  return gulp
     .src(paths_src.image, { encoding: false })
-    .pipe(newer(paths_src.image, { encoding: false }))
+    .pipe(newer({ dest: paths_dist.image }))
     .pipe(dest(paths_dist.image));
-  done();
 };
 export { copyImage };
 
-const minimage = (done) => {
-  gulp
+const compressImage = () =>
+  new Transform({
+    objectMode: true,
+    transform(file, _enc, callback) {
+      if (file.isNull() || file.isStream()) {
+        return callback(null, file);
+      }
+      const ext = path.extname(file.path).toLowerCase();
+      let pipeline;
+      if (ext === '.jpg' || ext === '.jpeg') {
+        pipeline = sharp(file.contents).jpeg({
+          quality: 75,
+          progressive: true,
+          mozjpeg: true,
+        });
+      } else if (ext === '.png') {
+        pipeline = sharp(file.contents).png({
+          compressionLevel: 9,
+          adaptiveFiltering: true,
+        });
+      } else {
+        return callback(null, file);
+      }
+      const original = file.contents;
+      pipeline
+        .toBuffer()
+        .then((buffer) => {
+          file.contents = buffer.length < original.length ? buffer : original;
+          callback(null, file);
+        })
+        .catch(callback);
+    },
+  });
+
+const minimage = () => {
+  return gulp
     .src(paths_src.image, { encoding: false })
-    .pipe(
-      imagemin(
-        [
-          gifsicle({ interlaced: true }),
-          mozjpeg({ quality: 75, progressive: true }),
-          optipng({ optimizationLevel: 1 }),
-          svgo({
-            plugins: [
-              {
-                name: 'removeViewBox',
-                active: true,
-              },
-              {
-                name: 'cleanupIDs',
-                active: false,
-              },
-            ],
-          }),
-        ],
-        { verbose: true },
-      ),
-    )
+    .pipe(compressImage())
     .pipe(dest(paths_dist.image));
-  done();
 };
 export { minimage };
 
-const minifyScripts = (done) => {
-  gulp
-    .src(paths_src.js)
-    .pipe(sourcemaps.init())
+// glob 결과 순서는 보장되지 않으므로 파일 경로 순으로 정렬해 병합 순서를 고정한다.
+// 순서가 중요한 파일은 01_, 02_ 처럼 숫자 접두어를 붙인다.
+const sortByPath = () => {
+  const files = [];
+  return new Transform({
+    objectMode: true,
+    transform(file, _enc, callback) {
+      files.push(file);
+      callback();
+    },
+    flush(callback) {
+      files
+        .sort((a, b) => a.path.localeCompare(b.path))
+        .forEach((file) => this.push(file));
+      callback();
+    },
+  });
+};
+
+const minifyScripts = () => {
+  return gulp
+    .src(paths_src.js, { sourcemaps: true })
+    .pipe(sortByPath())
     .pipe(concat('all.js'))
     .pipe(jshint())
     .pipe(jshint.reporter('jshint-stylish'))
     .pipe(jshint.reporter('fail'))
     .pipe(dest(paths_dist.js))
-    .pipe(terser().on('error', (error) => console.log(error)))
-    .pipe(uglify())
+    .pipe(terser())
     .pipe(rename({ suffix: '.min' }))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(dest(paths_dist.js));
-  done();
+    .pipe(dest(paths_dist.js, { sourcemaps: 'maps' }));
 };
 export { minifyScripts };
 
@@ -211,9 +282,10 @@ const syncFiles = (done) => {
   );
   gulp.watch(paths_src.image, series(copyImage, browserReload));
   gulp.watch(
-    [paths_src.njk, paths_src.njktemp, paths_src.css],
+    [paths_src.njk, paths_src.njktemp],
     series(compileSass, html, browserReload),
   );
+  gulp.watch(paths_src.css, series(lintSass, compileSass, html, browserReload));
   gulp.watch(paths_src.js, series(minifyScripts, browserReload));
   done();
 };
@@ -227,8 +299,8 @@ const markuplintTask = (done) => {
 };
 export { markuplintTask };
 
-const sitemap = (done) => {
-  gulp
+const sitemap = () => {
+  return gulp
     .src('./dist/**/*.html', { read: false })
     .pipe(
       generatemap({
@@ -236,23 +308,16 @@ const sitemap = (done) => {
       }),
     )
     .pipe(dest('./dist'));
-  done();
 };
 export { sitemap };
-
-const watcher = (done) => {
-  // watch(paths_src.image, copyImage);
-  done();
-};
-export { watcher };
 
 export default series(
   copyFont,
   copyImage,
   copyScript,
+  lintSass,
   compileSass,
   minifyScripts,
   html,
   syncFiles,
-  watcher,
 );
