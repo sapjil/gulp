@@ -93,6 +93,20 @@ const compileScss = () =>
     },
   });
 
+const lintSass = async () => {
+  const result = await stylelint.lint({
+    files: paths_src.css,
+    formatter: 'string',
+  });
+  if (result.report) {
+    console.log(result.report);
+  }
+  if (result.errored) {
+    throw new Error('stylelint: SCSS 린트 오류가 있어 빌드를 중단합니다.');
+  }
+};
+export { lintSass };
+
 const compileSass = () => {
   return gulp
     .src(paths_src.css)
@@ -100,7 +114,7 @@ const compileSass = () => {
     .pipe(compileScss())
     .pipe(csscomb())
     .pipe(
-      postcss([stylelint(), tailwindcss(), autoprefixer({ csscade: false })]),
+      postcss([tailwindcss(), autoprefixer({ csscade: false })]),
     )
     .pipe(dest(paths_dist.css))
     .pipe(postcss([cssnanoPlugin()]))
@@ -255,8 +269,12 @@ const syncFiles = (done) => {
   );
   gulp.watch(paths_src.image, series(copyImage, browserReload));
   gulp.watch(
-    [paths_src.njk, paths_src.njktemp, paths_src.css],
+    [paths_src.njk, paths_src.njktemp],
     series(compileSass, html, browserReload),
+  );
+  gulp.watch(
+    paths_src.css,
+    series(lintSass, compileSass, html, browserReload),
   );
   gulp.watch(paths_src.js, series(minifyScripts, browserReload));
   done();
@@ -285,6 +303,7 @@ export default series(
   copyFont,
   copyImage,
   copyScript,
+  lintSass,
   compileSass,
   minifyScripts,
   html,
