@@ -101,3 +101,6 @@ dist/
 *.app
 *.exe
 *.war
+
+# offline 브랜치: 번들 pnpm 의 dist/ 는 실행 코드이므로 제외하지 않는다 (OFFLINE.md 참고)
+!/offline-tools/**
