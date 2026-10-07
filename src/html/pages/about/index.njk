@@ -1,13 +1,25 @@
 {%- extends "./../_templates/_sub_layout.njk" -%}
-{% set description ='' %}
-{% set keyword ='about' %}
+{%- import "./../_templates/_macro/_macro.njk" as macro -%}
+{% set description ='나만의 템플릿' %}
+{% set pageurl = 'about' %}
+{% set keyword = 'about' %}
+{% set optimage = '/common/images/img_normal.jpg' %}
 {% set title = 'ABOUT!' %}
 
 {% block content %}
 <article class="wrap">
-  <h1 class="text-3xl">about 페이지 입니다!</h1>
-	<p>{% block page_title %}ABO!!UT!{% endblock %}</p>
+	<section>
+		<h1 class="text-2xl">about 페이지 입니다!</h1>
+		<p>{% block page_title %}ABO!!UT!{% endblock %}</p>
+		<p><img src="/common/images/img_normal.jpg" alt=""></p>
+	</section>
+	<section>
+		{{ macro.cardSwatch("brandColor", "#ccc", "Our main color.") }}
+		{{ macro.cardSwatch("brandHighlight", "#c00", "For callouts and highlights.") }}
+		{{ macro.cardSwatch("grayDark", "#c0c", "For things like code block backgrounds.") }}
+	</section>
 </article>
+
 {%- endblock %}
 
 {% block footerscript %}

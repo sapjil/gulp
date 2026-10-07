@@ -1,0 +1,18 @@
+{
+  "extends": ["markuplint:recommended"],
+  "excludeFiles": ["./node_modules/**/*"],
+  "parser": { ".njk$": "@markuplint/nunjucks-parser" },
+  "nodeRules": [
+    {
+      "selector": "img",
+      "rules": {
+        "required-attr": ["src", "alt"]
+      }
+    }
+  ],
+  "overrides": {
+    "dist/component.html": { "rules": { "required-h1": false } },
+    "dist/base.html": { "rules": { "required-h1": false } },
+    "dist/info/index.html": { "rules": { "required-h1": false } }
+  }
+}

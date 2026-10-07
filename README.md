@@ -3,6 +3,7 @@
 - 시작: `npx gulp`
 - HTML 생성 및 관리: `Nunjucks`
 - SCSS 린트: `npx gulp lintSass` (기본 작업에 포함, 오류 시 빌드 중단)
+- HTML 린트(markuplint): 기본 작업(`npx gulp`)과 watch에서 `html` 다음에 결과를 **출력만** 하고 빌드는 계속합니다(`reportHtml`). 오류 시 실패로 처리하려면 `npx gulp html` 다음에 `npx gulp lintHtml`
 - 이미지 압축: `npx gulp minimage`
 - SiteMap 생성: `npx gulp sitemap`
 
@@ -28,7 +29,17 @@
 - [x] tailwind 적용
 - [x] sitemap 생성 적용
 - [x] csscomb 충돌 해결(생성된 css에서 tailwind 영역은 미처리)
-- [ ] markuplint 적용: 테스트중
+- [x] markuplint 적용: 기본 작업에서 보고(`reportHtml`), 단독 실패 검사는 `npx gulp lintHtml`. include용 페이지 3개(component, base, info)는 `required-h1` 예외. 이미지 매크로(`image`)는 `width`/`height`를 값이 있을 때만 출력하며 단위 없는 정수(`200`)만 전달합니다. 자세한 내용은 CLAUDE.md
+
+## tailwind 사용여부 설정
+
+```js
+// gulpfile.js 의 compileSass
+// postcss 플러그인 배열에서 tailwindcss() 를 추가 또는 제거
+.pipe(postcss([tailwindcss(), autoprefixer()]))
+```
+
+- `src/scss/components/_tailwind.scss`의 `@tailwind` 지시어는 `tailwindcss()` 플러그인이 있어야 변환됩니다. 플러그인만 빼면 지시어가 그대로 CSS에 남으므로, 사용하지 않을 때는 `style.scss`의 `@use './components/tailwind';`도 함께 제거하세요.
 
 # git config
 
@@ -41,12 +52,8 @@
 
 ```
 [alias]
-  # glog = log --pretty='format:%C(yellow)%h %C(green)%cd %C(reset)%s %C(red)%d %C(cyan)[%an]' --date=format:'%c' --all --graph
-	# logline = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-	glog = log --pretty='format:%C(yellow)%h%x09%C(green)%cs %C(reset)%s %C(red)%d %C(cyan)[%an]' --date=format:'%c' --all --graph
-	llog = log --pretty='format:%C(yellow)%h %C(reset)%Cgreen(%cr) %C(reset) %s %C(red)%d %C(cyan)[%an]%Creset' --abbrev-commit
-	lg = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold red)%h%C(reset) : %C(bold green)(%ar)%C(reset) - %C(cyan)<%an>%C(reset)%C(bold yellow)%d%C(reset)%n%n%w(90,1,2)%C(white)%B%C(reset)%n'
-	plog = log --pretty='format:%C(yellow)%h %C(green)%cd %C(reset)%s %C(red)%d %C(cyan)[%an]' --date=iso
+  lg = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold red)%h%C(reset) : %C(bold green)(%ar)%C(reset) - %C(cyan)<%an>%C(reset)%C(bold yellow)%d%C(reset)%n%n%w(90,1,2)%C(white)%B%C(reset)%n'
+	llog = log --pretty='format:%C(yellow)%h %C(green)%cd %C(reset)%s %C(red)%d %C(cyan)[%an]' --date=format-local:'%Y/%m/%d %H:%M:%S'
 [commit]
 	template = .gitmessage.txt
 ```
