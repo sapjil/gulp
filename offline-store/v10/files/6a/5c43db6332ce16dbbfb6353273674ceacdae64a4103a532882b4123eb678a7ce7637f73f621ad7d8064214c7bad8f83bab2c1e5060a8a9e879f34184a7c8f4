@@ -1,0 +1,30 @@
+{
+	"name": "@markuplint/nunjucks-parser",
+	"version": "4.18.3",
+	"description": "Nunjucks template parser for markuplint",
+	"repository": "git@github.com:markuplint/markuplint.git",
+	"author": "Yusuke Hirao <yusukehirao@me.com>",
+	"license": "MIT",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./lib/index.js",
+			"types": "./lib/index.d.ts"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"dev": "tsc --watch --project tsconfig.build.json",
+		"clean": "tsc --build --clean tsconfig.build.json"
+	},
+	"dependencies": {
+		"@markuplint/html-parser": "4.18.3"
+	},
+	"devDependencies": {
+		"@markuplint/parser-utils": "4.18.3"
+	},
+	"gitHead": "c53026c2c600bb304f2088589f67303479e92e62"
+}

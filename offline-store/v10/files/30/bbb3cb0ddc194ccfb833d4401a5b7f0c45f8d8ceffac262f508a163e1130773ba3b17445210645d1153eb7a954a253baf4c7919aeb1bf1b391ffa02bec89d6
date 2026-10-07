@@ -1,0 +1,31 @@
+import { MLCharacterData } from './character-data.js';
+/**
+ * Represents a DOM Comment node wrapper in the markuplint DOM tree.
+ * Wraps an AST comment token and implements the standard DOM `Comment` interface.
+ *
+ * @template T - The rule configuration value type
+ * @template O - The rule options type
+ */
+export class MLComment extends MLCharacterData {
+    /**
+     * Returns a string appropriate for the type of node as `Attr`
+     *
+     * @see https://dom.spec.whatwg.org/#ref-for-exclusive-text-node%E2%91%A0
+     */
+    get nodeName() {
+        return '#comment';
+    }
+    /**
+     * Returns a number appropriate for the type of `Comment`
+     */
+    get nodeType() {
+        return this.COMMENT_NODE;
+    }
+    /**
+     * @implements DOM API: `Comment`
+     * @see https://dom.spec.whatwg.org/#dom-node-textcontent
+     */
+    get textContent() {
+        return this.data;
+    }
+}

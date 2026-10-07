@@ -1,0 +1,37 @@
+import type { DocumentFragmentNodeType } from './types.js';
+import type { MLASTNode } from '@markuplint/ml-ast';
+import type { PlainData, RuleConfigValue } from '@markuplint/ml-config';
+import { MLParentNode } from './parent-node.js';
+/**
+ * Represents a DOM DocumentFragment node wrapper in the markuplint DOM tree.
+ * Used for JSX fragments and similar constructs where a set of nodes
+ * is grouped without a wrapping element.
+ *
+ * @template T - The rule configuration value type
+ * @template O - The rule options type
+ */
+export declare class MLDocumentFragment<T extends RuleConfigValue, O extends PlainData = undefined> extends MLParentNode<T, O, MLASTNode> implements DocumentFragment {
+    /**
+     * Returns a string appropriate for the type of node as `DocumentFragment`
+     *
+     * @see https://dom.spec.whatwg.org/#ref-for-documentfragment%E2%91%A0%E2%91%A6
+     */
+    get nodeName(): "#document-fragment";
+    /**
+     * Returns a number appropriate for the type of `DocumentFragment`
+     */
+    get nodeType(): DocumentFragmentNodeType;
+    /**
+     * @implements DOM API: `DocumentFragment`
+     * @see https://dom.spec.whatwg.org/#dom-node-textcontent
+     */
+    get textContent(): string;
+    /**
+     * **IT THROWS AN ERROR WHEN CALLING THIS.**
+     *
+     * @deprecated
+     * @unsupported
+     * @implements DOM API: `DocumentFragment`
+     */
+    getElementById(elementId: string): HTMLElement | null;
+}

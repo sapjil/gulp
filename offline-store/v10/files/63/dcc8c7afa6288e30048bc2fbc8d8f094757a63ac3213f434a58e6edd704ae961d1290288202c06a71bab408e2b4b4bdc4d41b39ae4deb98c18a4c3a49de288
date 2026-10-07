@@ -1,0 +1,60 @@
+import { MLRule } from '@markuplint/ml-core';
+import { autoLoadRules } from './auto-load-rules.js';
+let cachedPresetRules = null;
+/**
+ * Resolves all rules from preset rules, plugins, and auto-loaded rules into
+ * a flat array of {@link MLRule} instances.
+ *
+ * @param plugins - The resolved plugins that may provide custom rules
+ * @param ruleset - The current ruleset (used for auto-loading)
+ * @param importPreset - Whether to import the built-in preset rules from `@markuplint/rules`
+ * @param autoLoad - Whether to auto-load rules referenced in the ruleset
+ * @returns An array of all resolved MLRule instances
+ *
+ * @deprecated The `autoLoad` parameter is deprecated
+ */
+export async function resolveRules(plugins, ruleset, importPreset, 
+/**
+ * @deprecated
+ */
+autoLoad) {
+    const rules = importPreset ? await importPresetRules() : [];
+    for (const plugin of plugins) {
+        if (!plugin.rules) {
+            continue;
+        }
+        for (const [name, seed] of Object.entries(plugin.rules)) {
+            const rule = new MLRule({
+                name: `${plugin.name}/${name}`,
+                ...seed,
+            });
+            rules.push(rule);
+        }
+    }
+    if (autoLoad) {
+        const { rules: additionalRules } = await autoLoadRules(ruleset);
+        for (const rule of additionalRules) {
+            rules.push(rule);
+        }
+    }
+    // Clone
+    return [...rules];
+}
+async function importPresetRules() {
+    if (cachedPresetRules) {
+        return [...cachedPresetRules];
+    }
+    const modName = '@markuplint/rules';
+    const mod = await import(modName);
+    const presetRules = mod.default;
+    const ruleList = Object.entries(presetRules).map(([name, seed]) => {
+        const rule = new MLRule({
+            name,
+            ...seed,
+        });
+        return rule;
+    });
+    cachedPresetRules = ruleList;
+    // Clone
+    return [...ruleList];
+}

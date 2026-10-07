@@ -1,0 +1,41 @@
+import { validateAriaVersion, ARIA_RECOMMENDED_VERSION, getComputedRole } from '@markuplint/ml-spec';
+/**
+ * Creates the `:role()` extended pseudo-class handler.
+ *
+ * Matches elements whose computed ARIA role equals the specified role name.
+ * Supports version syntax: `:role(roleName|version)`.
+ *
+ * @param specs - The HTML/ARIA specification data used for role computation
+ * @returns An extended pseudo-class handler function
+ */
+export function ariaRolePseudoClass(specs) {
+    return (content) => (
+    // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+    el) => {
+        const aria = ariaPseudoClassParser(content);
+        const computed = getComputedRole(specs, el, aria.version ?? ARIA_RECOMMENDED_VERSION);
+        if (computed.role?.name === aria.role) {
+            return {
+                specificity: [0, 1, 0],
+                matched: true,
+                nodes: [el],
+                has: [],
+            };
+        }
+        return {
+            specificity: [0, 1, 0],
+            matched: false,
+        };
+    };
+}
+function ariaPseudoClassParser(syntax) {
+    const [roleName, _version] = syntax.split('|');
+    const version = _version ?? ARIA_RECOMMENDED_VERSION;
+    if (!validateAriaVersion(version)) {
+        throw new SyntaxError(`Unsupported ARIA version: ${version}`);
+    }
+    return {
+        role: roleName?.trim().toLowerCase() ?? syntax.trim().toLowerCase(),
+        version,
+    };
+}

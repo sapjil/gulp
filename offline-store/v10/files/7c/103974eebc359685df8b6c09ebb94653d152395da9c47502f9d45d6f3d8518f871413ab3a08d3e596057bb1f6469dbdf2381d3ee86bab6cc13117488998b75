@@ -1,0 +1,7 @@
+import type { CustomSyntaxChecker } from '../../types.js';
+/**
+ * Validates a global date and time string (date + time + time-zone offset).
+ *
+ * @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#global-dates-and-times
+ */
+export declare const checkGlobalDateAndTimeString: CustomSyntaxChecker;

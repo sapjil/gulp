@@ -1,0 +1,260 @@
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _MLAttr_localName, _MLAttr_namespaceURI, _MLAttr_potentialName, _MLAttr_potentialValue;
+import { resolveNamespace } from '@markuplint/ml-spec';
+import { MLToken } from '../token/token.js';
+import { MLDomTokenList } from './dom-token-list.js';
+import { MLNode } from './node.js';
+import { UnexpectedCallError } from './unexpected-call-error.js';
+/**
+ * Represents a DOM Attr (attribute) node wrapper in the markuplint DOM tree.
+ * Wraps an AST attribute token and provides access to the attribute's name, value,
+ * tokens (name, equal sign, quotes, value), and metadata such as whether
+ * the attribute is a directive or has a dynamic value.
+ *
+ * @template T - The rule configuration value type
+ * @template O - The rule options type
+ */
+export class MLAttr extends MLNode {
+    /**
+     * Creates a new MLAttr instance from an AST attribute token.
+     *
+     * @param astToken - The AST attribute token to wrap
+     * @param ownElement - The element that owns this attribute
+     */
+    constructor(astToken, 
+    // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
+    ownElement) {
+        super(astToken, ownElement.ownerMLDocument);
+        /**
+         * The end quote token of the attribute value, or null if the attribute has no value or quotes.
+         */
+        this.endQuote = null;
+        /**
+         * The equal sign token between the attribute name and value, or null if absent.
+         */
+        this.equal = null;
+        _MLAttr_localName.set(this, void 0);
+        /**
+         * The token representing the attribute name, or null for spread attributes.
+         */
+        this.nameNode = null;
+        _MLAttr_namespaceURI.set(this, void 0);
+        _MLAttr_potentialName.set(this, void 0);
+        _MLAttr_potentialValue.set(this, void 0);
+        /**
+         * The whitespace token after the equal sign, or null if absent.
+         */
+        this.spacesAfterEqual = null;
+        /**
+         * The whitespace token before the equal sign, or null if absent.
+         */
+        this.spacesBeforeEqual = null;
+        /**
+         * The whitespace token before the attribute name, or null if absent.
+         */
+        this.spacesBeforeName = null;
+        /**
+         * The start quote token of the attribute value, or null if the attribute has no value or quotes.
+         */
+        this.startQuote = null;
+        /**
+         * The token representing the attribute value, or null if the attribute has no value.
+         */
+        this.valueNode = null;
+        /**
+         * Returns the "string" if HTML syntax. Otherwise, returns a type in its syntax.
+         *
+         * @default "string"
+         * @implements `@markuplint/ml-core` API: `MLAttr`
+         */
+        this.valueType = 'string';
+        this.ownerElement = ownElement;
+        if (this._astToken.type === 'spread') {
+            __classPrivateFieldSet(this, _MLAttr_namespaceURI, ownElement.namespaceURI, "f");
+            this.valueType = 'code';
+            __classPrivateFieldSet(this, _MLAttr_localName, '#spread', "f");
+            __classPrivateFieldSet(this, _MLAttr_potentialName, '#spread', "f");
+            __classPrivateFieldSet(this, _MLAttr_potentialValue, this._astToken.raw, "f");
+            this.isDirective = true;
+            this.isDynamicValue = true;
+            this.isDuplicatable = true;
+            return;
+        }
+        this.spacesBeforeName = new MLToken(this._astToken.spacesBeforeName);
+        this.nameNode = new MLToken(this._astToken.name);
+        this.spacesBeforeEqual = new MLToken(this._astToken.spacesBeforeEqual);
+        this.equal = new MLToken(this._astToken.equal);
+        this.spacesAfterEqual = new MLToken(this._astToken.spacesAfterEqual);
+        this.startQuote = new MLToken(this._astToken.startQuote);
+        this.valueNode = new MLToken(this._astToken.value);
+        this.endQuote = new MLToken(this._astToken.endQuote);
+        this.isDynamicValue = this._astToken.isDynamicValue;
+        this.isDirective = this._astToken.isDirective;
+        this.candidate = this._astToken.candidate;
+        __classPrivateFieldSet(this, _MLAttr_potentialName, this._astToken.potentialName ?? this.nameNode?.raw ?? '', "f");
+        __classPrivateFieldSet(this, _MLAttr_potentialValue, this._astToken.potentialValue ?? this.valueNode?.raw ?? '', "f");
+        this.isDuplicatable = this._astToken.isDuplicatable;
+        const ns = resolveNamespace(__classPrivateFieldGet(this, _MLAttr_potentialName, "f"), ownElement.namespaceURI);
+        __classPrivateFieldSet(this, _MLAttr_localName, ns.localName, "f");
+        __classPrivateFieldSet(this, _MLAttr_namespaceURI, ns.namespaceURI, "f");
+    }
+    /**
+     * Returns the local name portion of the attribute (without namespace prefix).
+     *
+     * @implements DOM API: `Attr`
+     * @see https://dom.spec.whatwg.org/#ref-for-dom-attr-localname
+     */
+    get localName() {
+        return __classPrivateFieldGet(this, _MLAttr_localName, "f");
+    }
+    /**
+     * Returns the qualified attribute name (the potential name resolved by the parser).
+     *
+     * @implements DOM API: `Attr`
+     * @see https://dom.spec.whatwg.org/#dom-attr-name
+     */
+    get name() {
+        return __classPrivateFieldGet(this, _MLAttr_potentialName, "f");
+    }
+    /**
+     * Returns the namespace URI of this attribute, resolved from the attribute name.
+     *
+     * @implements DOM API: `Attr`
+     * @see https://dom.spec.whatwg.org/#ref-for-dom-attr-namespaceuri
+     */
+    get namespaceURI() {
+        return __classPrivateFieldGet(this, _MLAttr_namespaceURI, "f");
+    }
+    /**
+     * Returns a string appropriate for the type of node as `Attr`
+     *
+     * @see https://dom.spec.whatwg.org/#ref-for-attr%E2%91%A4
+     */
+    get nodeName() {
+        return this.name;
+    }
+    /**
+     * Returns a number appropriate for the type of `Attr`
+     */
+    get nodeType() {
+        return this.ATTRIBUTE_NODE;
+    }
+    /**
+     * Returns the attribute value, equivalent to the `value` property.
+     *
+     * @implements DOM API: `Attr`
+     * @see https://dom.spec.whatwg.org/#dom-node-nodevalue
+     */
+    get nodeValue() {
+        return this.value;
+    }
+    /**
+     * **IT THROWS AN ERROR WHEN CALLING THIS.**
+     *
+     * @unsupported
+     * @implements DOM API: `Attr`
+     * @see https://dom.spec.whatwg.org/#ref-for-dom-attr-prefix
+     */
+    get prefix() {
+        throw new UnexpectedCallError('Not supported "prefix" property');
+    }
+    /**
+     * @implements `@markuplint/ml-core` API: `MLAttr`
+     */
+    get rule() {
+        return this.ownerElement.rule;
+    }
+    /**
+     * @implements DOM API: `Attr`
+     * @see https://dom.spec.whatwg.org/#dom-attr-specified
+     */
+    get specified() {
+        return true;
+    }
+    /**
+     * @implements DOM API: `Attr`
+     * @see https://dom.spec.whatwg.org/#dom-node-textcontent
+     */
+    get textContent() {
+        return this.value;
+    }
+    /**
+     * @implements `@markuplint/ml-core` API: `MLAttr`
+     */
+    get tokenList() {
+        return this.isDynamicValue ? null : new MLDomTokenList(this.value, [this]);
+    }
+    /**
+     * @implements DOM API: `Attr`
+     * @see https://dom.spec.whatwg.org/#dom-attr-value
+     */
+    get value() {
+        return __classPrivateFieldGet(this, _MLAttr_potentialValue, "f");
+    }
+    /**
+     * Fixes the attribute value.
+     * If the attribute is not a spread attribute, it calls the `fix` method of the `valueNode`.
+     *
+     * @implements `@markuplint/ml-core` API: `MLAttr`
+     *
+     * @param raw - The raw attribute value.
+     */
+    fix(raw) {
+        if (this.localName === '#spread') {
+            return;
+        }
+        // `valueNode` is not null when it is no spread.
+        this.valueNode?.fix(raw);
+    }
+    /**
+     * Returns a normalized string representation of the attribute,
+     * stripping extraneous whitespace around the name, equal sign, and value tokens.
+     * Falls back to the raw string if any token is missing.
+     *
+     * @implements `@markuplint/ml-core` API: `MLAttr`
+     * @returns The normalized attribute string
+     */
+    toNormalizeString() {
+        if (this.nameNode && this.equal && this.startQuote && this.valueNode && this.endQuote) {
+            return this.nameNode.raw + this.equal.raw + this.startQuote.raw + this.valueNode.raw + this.endQuote.raw;
+        }
+        return this.raw;
+    }
+    /**
+     * Returns a string representation of the attribute.
+     *
+     * @implements DOM API: `Attr`
+     *
+     * @param includesSpacesBeforeName - Whether to include spaces before the attribute name.
+     * @returns The string representation of the attribute.
+     */
+    toString(fixed = false) {
+        if (!fixed) {
+            return this.raw;
+        }
+        if (this.localName === '#spread') {
+            return this.raw;
+        }
+        const tokens = [this.nameNode?.toString(true) ?? ''];
+        if (this.equal && this.equal.toString(true) !== '') {
+            tokens.push(this.spacesBeforeEqual?.toString(true) ?? '', this.equal?.toString(true) ?? '', this.spacesAfterEqual?.toString(true) ?? '', this.startQuote?.toString(true) ?? '', this.valueNode?.toString(true) ?? '', this.endQuote?.toString(true) ?? '');
+        }
+        else if (this.valueNode && this.valueNode.toString(true) !== '') {
+            tokens.push(
+            //
+            '=', this.startQuote?.toString(true) || '"', this.valueNode.toString(true), this.endQuote?.toString(true) || '"');
+        }
+        return tokens.join('');
+    }
+}
+_MLAttr_localName = new WeakMap(), _MLAttr_namespaceURI = new WeakMap(), _MLAttr_potentialName = new WeakMap(), _MLAttr_potentialValue = new WeakMap();

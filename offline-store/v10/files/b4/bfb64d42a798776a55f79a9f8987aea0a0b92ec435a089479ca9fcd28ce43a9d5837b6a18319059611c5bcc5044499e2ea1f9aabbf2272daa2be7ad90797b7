@@ -1,0 +1,43 @@
+import { MLParentNode } from './parent-node.js';
+import { UnexpectedCallError } from './unexpected-call-error.js';
+/**
+ * Represents a DOM DocumentFragment node wrapper in the markuplint DOM tree.
+ * Used for JSX fragments and similar constructs where a set of nodes
+ * is grouped without a wrapping element.
+ *
+ * @template T - The rule configuration value type
+ * @template O - The rule options type
+ */
+export class MLDocumentFragment extends MLParentNode {
+    /**
+     * Returns a string appropriate for the type of node as `DocumentFragment`
+     *
+     * @see https://dom.spec.whatwg.org/#ref-for-documentfragment%E2%91%A0%E2%91%A6
+     */
+    get nodeName() {
+        return '#document-fragment';
+    }
+    /**
+     * Returns a number appropriate for the type of `DocumentFragment`
+     */
+    get nodeType() {
+        return this.DOCUMENT_FRAGMENT_NODE;
+    }
+    /**
+     * @implements DOM API: `DocumentFragment`
+     * @see https://dom.spec.whatwg.org/#dom-node-textcontent
+     */
+    get textContent() {
+        return [...this.childNodes].map(child => child.textContent ?? '').join('');
+    }
+    /**
+     * **IT THROWS AN ERROR WHEN CALLING THIS.**
+     *
+     * @deprecated
+     * @unsupported
+     * @implements DOM API: `DocumentFragment`
+     */
+    getElementById(elementId) {
+        throw new UnexpectedCallError('Not supported "getElementById" method');
+    }
+}

@@ -1,0 +1,16 @@
+/**
+ * Checks whether a string is a valid browsing context name.
+ *
+ * @see https://html.spec.whatwg.org/multipage/browsers.html#valid-browsing-context-name
+ *
+ * > A valid browsing context name is any string with at least one character
+ * > that does not start with a U+005F LOW LINE character.
+ * > (Names starting with an underscore are reserved for special keywords.)
+ *
+ * @deprecated Use {@link isNavigableTargetName} instead.
+ */
+export const isBrowserContextName = () => {
+    return value => {
+        return !!value && value[0] !== '_';
+    };
+};

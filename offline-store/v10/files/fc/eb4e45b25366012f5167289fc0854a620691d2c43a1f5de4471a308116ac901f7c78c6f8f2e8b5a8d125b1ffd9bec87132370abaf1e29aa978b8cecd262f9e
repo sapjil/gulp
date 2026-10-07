@@ -1,0 +1,167 @@
+import type { TokenValue } from './types.js';
+import type { Expect, Result, List, UnmatchedResult } from '../types.js';
+import { Token } from './token.js';
+type TokenCollectionOptions = Partial<Omit<List, 'token'> & {
+    specificSeparator: string | string[];
+}>;
+/**
+ * Callback function for sequential token checking in {@link TokenCollection.eachCheck}.
+ * Receives the current head token and remaining tail tokens.
+ * Returns a result to stop iteration, or `void` to continue.
+ */
+export type TokenEachCheck = (head: Readonly<Token> | null, tail: TokenCollection) => Result | void;
+/**
+ * An ordered collection of tokens parsed from a string value.
+ *
+ * Extends `Array<Token>` with parsing, validation, and query capabilities.
+ * Supports configurable separators (space, comma, or custom), uniqueness
+ * constraints, ordering checks, and case sensitivity options.
+ */
+export declare class TokenCollection extends Array<Token> {
+    /**
+     * Creates a TokenCollection by matching a value against a sequence of regex patterns.
+     *
+     * @param value - The source token or string to parse
+     * @param patterns - The regex patterns to match sequentially
+     * @param typeOptions - Optional collection configuration
+     * @returns A new TokenCollection containing the matched tokens
+     */
+    static fromPatterns(value: Readonly<Token> | string, patterns: readonly Readonly<RegExp>[], typeOptions?: Omit<TokenCollectionOptions, 'specificSeparator'> & {
+        repeat?: boolean;
+    }): TokenCollection;
+    static get [Symbol.species](): ArrayConstructor;
+    readonly allowEmpty: NonNullable<List['allowEmpty']>;
+    readonly caseInsensitive: NonNullable<List['caseInsensitive']>;
+    readonly disallowToSurroundBySpaces: NonNullable<List['disallowToSurroundBySpaces']>;
+    readonly number: List['number'];
+    readonly ordered: NonNullable<List['ordered']>;
+    readonly separator: NonNullable<List['separator']>;
+    readonly unique: NonNullable<List['unique']>;
+    constructor(value?: string, typeOptions?: TokenCollectionOptions);
+    constructor(value?: number);
+    /**
+     * The concatenated string value of all tokens in this collection.
+     */
+    get value(): string;
+    /**
+     * Validates the token collection structure against its configuration.
+     *
+     * Checks for unexpected spaces, consecutive commas, empty tokens,
+     * and duplicate values based on the collection's separator, allowEmpty,
+     * and unique settings.
+     *
+     * @param options - Optional validation settings including expected values and reference URL
+     * @returns The validation result
+     */
+    check(options?: {
+        expects?: Expect[];
+        ref?: string;
+        cache?: boolean;
+    }): import("../types.js").MatchedResult | UnmatchedResult;
+    /**
+     * Splits this collection into chunks of the specified size.
+     *
+     * @param split - The number of tokens per chunk
+     * @returns An array of TokenCollection chunks
+     */
+    chunk(split: number): TokenCollection[];
+    /**
+     * Iterates over consecutive token pairs, calling the callback for each pair.
+     *
+     * @param callback - A function receiving the previous and current token; return a token to stop iteration
+     * @returns The token returned by the callback, or `null` if iteration completes
+     */
+    compareTokens(callback: (prev: Readonly<Token>, current: Readonly<Token>) => Readonly<Token> | null | void): Readonly<Token> | null | undefined;
+    /**
+     * Splits this collection into two at the given position.
+     *
+     * @param position - The index at which to split
+     * @returns A tuple of two TokenCollections: before and after the position
+     */
+    divide(position: number): readonly [TokenCollection, TokenCollection];
+    /**
+     * Applies a sequence of check callbacks to consecutive tokens.
+     *
+     * Each callback receives the current head token and remaining tail.
+     * Tracks pass count and cumulative offset for error reporting.
+     *
+     * @param callbacks - The check functions to apply sequentially
+     * @returns The validation result
+     */
+    eachCheck(...callbacks: readonly TokenEachCheck[]): Result;
+    /**
+     * Creates a new TokenCollection containing only tokens that pass the test.
+     *
+     * @param callback - The filter predicate function
+     * @returns A new TokenCollection with the filtered tokens
+     */
+    filter(callback: Parameters<Array<Token>['filter']>[0]): TokenCollection;
+    /**
+     * Finds the first occurrence of two consecutive tokens of the same type.
+     *
+     * @param tokenType - The token type number to check for consecutive occurrences
+     * @returns The second consecutive token, or `null` if none found
+     */
+    getConsecutiveToken(tokenType: number): Readonly<Token> | null;
+    /**
+     * Finds the first duplicated token in this collection.
+     *
+     * Comparison respects the `caseInsensitive` setting of this collection.
+     *
+     * @returns The duplicated token, or `null` if all tokens are unique
+     */
+    getDuplicated(): Token | null;
+    /**
+     * Returns only the identifier tokens, excluding whitespace and separators.
+     *
+     * @returns A new TokenCollection containing only Ident-type tokens
+     */
+    getIdentTokens(): TokenCollection;
+    /**
+     * Checks whether any token in this collection matches the given value.
+     *
+     * @param value - The token value, type number, regex, or array to check against
+     * @returns Whether any token matches
+     */
+    has(value: TokenValue): boolean;
+    /**
+     * Splits this collection into a head token and a tail collection.
+     *
+     * @returns An object with `head` (first token or null) and `tail` (remaining tokens)
+     */
+    headAndTail(): {
+        head: Token | null;
+        tail: TokenCollection;
+    };
+    /**
+     * Searches for the first token that includes the given value.
+     *
+     * @param value - The token value, type number, regex, or array to search for
+     * @returns The first matching token, or `null` if not found
+     */
+    search(value: TokenValue): Token | null;
+    /**
+     * Verifies that tokens alternate between the specified types in order.
+     *
+     * @param tokenNumbers - The expected repeating pattern of token types
+     * @param lastTokenNumber - Optional expected type for the last token
+     * @returns An error object if the pattern is violated, or `null` if valid
+     */
+    takeTurns(tokenNumbers: ReadonlyArray<number>, lastTokenNumber?: number): {
+        unexpectedLastToken: boolean;
+        expectedTokenNumber: number | undefined;
+        token: Token;
+    } | null;
+    /**
+     * Converts all tokens in this collection to plain JSON-serializable objects.
+     *
+     * @returns An array of plain token objects
+     */
+    toJSON(): {
+        type: number;
+        value: string;
+        offset: number;
+    }[];
+    private static _new;
+}
+export {};

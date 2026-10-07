@@ -1,0 +1,15 @@
+import type { ElementSpec } from '../../types/index.js';
+import type { PermittedContentPattern } from '../../types/permitted-structures.js';
+import type { ReadonlyDeep } from 'type-fest';
+type Specs = readonly Pick<ElementSpec, 'name' | 'contentModel'>[];
+/**
+ * Retrieves the permitted content model for an element. Evaluates any conditional
+ * content models based on the element's current attributes (e.g., different content
+ * models for `<ol>` vs `<ol reversed>`). Results are cached per element and spec set.
+ *
+ * @param el - The DOM element to retrieve the content model for
+ * @param specs - The element specifications containing content model definitions
+ * @returns The permitted content patterns array, a boolean (true for any content, false for no content), or null if no spec exists
+ */
+export declare function getContentModel(el: Element, specs: Specs): ReadonlyDeep<PermittedContentPattern[]> | boolean | null;
+export {};

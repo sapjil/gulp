@@ -1,0 +1,33 @@
+{
+	"name": "@markuplint/html-parser",
+	"version": "4.18.3",
+	"description": "HTML parser for markuplint",
+	"repository": "git@github.com:markuplint/markuplint.git",
+	"author": "Yusuke Hirao <yusukehirao@me.com>",
+	"license": "MIT",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./lib/index.js",
+			"types": "./lib/index.d.ts"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"typedoc": {
+		"entryPoint": "./src/index.ts"
+	},
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"dev": "tsc --watch --project tsconfig.build.json",
+		"clean": "tsc --build --clean tsconfig.build.json"
+	},
+	"dependencies": {
+		"@markuplint/ml-ast": "4.18.0",
+		"@markuplint/parser-utils": "4.18.3",
+		"parse5": "8.0.1",
+		"type-fest": "5.6.0"
+	},
+	"gitHead": "c53026c2c600bb304f2088589f67303479e92e62"
+}

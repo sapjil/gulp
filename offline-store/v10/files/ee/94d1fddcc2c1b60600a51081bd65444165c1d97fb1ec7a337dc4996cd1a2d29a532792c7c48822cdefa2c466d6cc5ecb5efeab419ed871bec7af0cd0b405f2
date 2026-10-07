@@ -1,0 +1,263 @@
+import deepmerge from 'deepmerge';
+import { deleteUndefProp, cleanOptions, isRuleConfigValue } from './utils.js';
+/**
+ * Deep-merges two markuplint configurations into an optimized result.
+ *
+ * Plugins, arrays, and rules are merged with specific strategies:
+ * - Plugins are concatenated and deduplicated by name
+ * - Arrays (excludeFiles, nodeRules, childNodeRules) are concatenated
+ * - Rules are merged per-key with right-side precedence
+ * - The `extends` property is removed from the result when `b` is provided
+ *
+ * @param a - The base configuration
+ * @param b - The configuration to merge on top of `a`
+ * @returns The merged and optimized configuration
+ */
+export function mergeConfig(a, b) {
+    const deleteExtendsProp = !!b;
+    b = b ?? {};
+    const config = {
+        ...a,
+        ...b,
+        plugins: concatArray(a.plugins, b.plugins, true, 'name')?.map(plugin => {
+            if (typeof plugin === 'string') {
+                return {
+                    name: plugin,
+                };
+            }
+            return plugin;
+        }),
+        parser: mergeObject(a.parser, b.parser),
+        parserOptions: mergeObject(a.parserOptions, b.parserOptions),
+        specs: mergeObject(a.specs, b.specs),
+        excludeFiles: concatArray(a.excludeFiles, b.excludeFiles, true),
+        severity: mergeObject(a.severity, b.severity),
+        pretenders: mergePretenders(a.pretenders, b.pretenders),
+        rules: mergeRules(
+        // TODO: Deep merge
+        a.rules, b.rules),
+        nodeRules: concatArray(a.nodeRules, b.nodeRules),
+        childNodeRules: concatArray(a.childNodeRules, b.childNodeRules),
+        overrideMode: b.overrideMode ?? a.overrideMode,
+        overrides: mergeOverrides(a.overrides, b.overrides),
+        extends: concatArray(toReadonlyArray(a.extends), toReadonlyArray(b.extends)),
+    };
+    if (deleteExtendsProp) {
+        // @ts-ignore
+        delete config.extends;
+    }
+    deleteUndefProp(config);
+    return config;
+}
+/**
+ * Merges two rule configurations with right-side precedence.
+ *
+ * If `b` is `false`, the rule is unconditionally disabled.
+ * If `b` is a direct value, it replaces or extends `a`.
+ * If both are full config objects, their properties are merged.
+ *
+ * @param a - The base rule configuration (may be `null` or `undefined`)
+ * @param b - The rule configuration to merge on top
+ * @returns The merged rule configuration
+ */
+export function mergeRule(a, b) {
+    const oA = optimizeRule(a);
+    const oB = optimizeRule(b);
+    // Particular behavior:
+    // If the right-side value is false, return false.
+    // In short; The `false` makes the rule to be disabled absolutely.
+    if (oB === false || (!isRuleConfigValue(oB) && oB?.value === false)) {
+        return false;
+    }
+    if (oA === undefined) {
+        return oB ?? {};
+    }
+    if (oB === undefined) {
+        return oA;
+    }
+    if (isRuleConfigValue(oB)) {
+        if (isRuleConfigValue(oA)) {
+            if (Array.isArray(oA) && Array.isArray(oB)) {
+                return [...oA, ...oB];
+            }
+            return oB;
+        }
+        const value = Array.isArray(oA.value) && Array.isArray(oB) ? [...oA.value, ...oB] : oB;
+        const res = cleanOptions({ ...oA, value });
+        deleteUndefProp(res);
+        return res;
+    }
+    const severity = oB.severity ?? (isRuleConfigValue(oA) ? undefined : oA.severity);
+    const value = oB.value ?? (isRuleConfigValue(oA) ? oA : oA.value);
+    const options = mergeObject(isRuleConfigValue(oA) ? undefined : oA.options, oB.options);
+    const reason = oB.reason ?? (isRuleConfigValue(oA) ? undefined : oA.reason);
+    const res = {
+        severity,
+        value,
+        options,
+        reason,
+    };
+    deleteUndefProp(res);
+    return res;
+}
+function mergePretenders(a, b) {
+    if (!a && !b) {
+        return;
+    }
+    const aDetails = a ? convertPretenersToDetails(a) : undefined;
+    const bDetails = b ? convertPretenersToDetails(b) : undefined;
+    const details = mergeObject(aDetails, bDetails) ?? {};
+    deleteUndefProp(details);
+    return details;
+}
+function convertPretenersToDetails(pretenders) {
+    if (isReadonlyArray(pretenders)) {
+        return {
+            data: pretenders,
+        };
+    }
+    return pretenders;
+}
+function mergeOverrides(a = {}, b = {}) {
+    const keys = new Set();
+    for (const key of Object.keys(a))
+        keys.add(key);
+    for (const key of Object.keys(b))
+        keys.add(key);
+    if (keys.size === 0) {
+        return;
+    }
+    const result = {};
+    for (const key of keys) {
+        const config = mergeConfig(a[key] ?? {}, b[key] ?? {});
+        // @ts-ignore
+        delete config.$schema;
+        // @ts-ignore
+        delete config.extends;
+        // @ts-ignore
+        delete config.overrides;
+        deleteUndefProp(config);
+        result[key] = config;
+    }
+    return result;
+}
+function mergeObject(a, b) {
+    if (a == null) {
+        return b ?? undefined;
+    }
+    if (b == null) {
+        return a ?? undefined;
+    }
+    const res = deepmerge(a, b);
+    deleteUndefProp(res);
+    return res;
+}
+function concatArray(a, b, uniquely = false, comparePropName) {
+    const newArray = [];
+    function concat(item) {
+        if (!uniquely) {
+            newArray.push(item);
+            return;
+        }
+        if (newArray.includes(item)) {
+            return;
+        }
+        if (!comparePropName) {
+            newArray.push(item);
+            return;
+        }
+        const name = getName(item, comparePropName);
+        if (!name) {
+            newArray.push(item);
+            return;
+        }
+        const existedIndex = newArray.findIndex(e => getName(e, comparePropName) === name);
+        if (existedIndex === -1) {
+            newArray.push(item);
+            return;
+        }
+        if (typeof item === 'string') {
+            return;
+        }
+        const existed = newArray[existedIndex];
+        const merged = mergeObject(existed, item);
+        if (!merged) {
+            newArray.push(item);
+            return;
+        }
+        newArray.splice(existedIndex, 1, merged);
+    }
+    // eslint-disable-next-line unicorn/no-array-for-each
+    a?.forEach(concat);
+    // eslint-disable-next-line unicorn/no-array-for-each
+    b?.forEach(concat);
+    return newArray.length === 0 ? undefined : newArray;
+}
+function getName(item, comparePropName) {
+    if (item == null) {
+        return null;
+    }
+    if (typeof item === 'string') {
+        return item;
+    }
+    if (typeof item === 'object' && item && comparePropName in item && typeof item[comparePropName] === 'string') {
+        return item[comparePropName];
+    }
+    return null;
+}
+function mergeRules(a, b) {
+    if (a == null) {
+        return b && optimizeRules(b);
+    }
+    if (b == null) {
+        return optimizeRules(a);
+    }
+    const res = optimizeRules(a);
+    for (const [key, rule] of Object.entries(b)) {
+        const merged = mergeRule(res[key], rule);
+        if (merged != null) {
+            res[key] = merged;
+        }
+    }
+    deleteUndefProp(res);
+    return Object.freeze(res);
+}
+function optimizeRules(rules) {
+    const res = {};
+    for (const [key, rule] of Object.entries(rules)) {
+        const _rule = optimizeRule(rule);
+        if (_rule != null) {
+            res[key] = _rule;
+        }
+    }
+    return res;
+}
+function optimizeRule(rule) {
+    if (rule === undefined) {
+        return;
+    }
+    if (isRuleConfigValue(rule)) {
+        return rule;
+    }
+    return cleanOptions(rule);
+}
+function toReadonlyArray(value) {
+    if (value == null) {
+        return [];
+    }
+    return isReadonlyArray(value) ? value : [value];
+}
+/**
+ * Checks if a value is a readonly array.
+ *
+ * If the array is readonly, it passes the type check.
+ * However, it saves the type because using ESLint warns `@typescript-eslint/prefer-readonly-parameter-types`.
+ *
+ * @param value - The value to check.
+ * @returns `true` if the value is a readonly array, `false` otherwise.
+ * @template T - The type of elements in the array.
+ * @template X - The type of the value if it's not an array.
+ */
+function isReadonlyArray(value) {
+    return Array.isArray(value);
+}

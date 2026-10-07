@@ -1,0 +1,41 @@
+{
+	"name": "@markuplint/rules",
+	"version": "4.18.3",
+	"description": "Built-in rules of markuplint",
+	"repository": "git@github.com:markuplint/markuplint.git",
+	"author": "Yusuke Hirao <yusukehirao@me.com>",
+	"license": "MIT",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./lib/index.js",
+			"types": "./lib/index.d.ts"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"dev": "tsc --watch --project tsconfig.build.json",
+		"clean": "tsc --build --clean tsconfig.build.json"
+	},
+	"browser": {
+		"./lib/permitted-contents/debug.js": "./lib/permitted-contents/debug.browser.js"
+	},
+	"dependencies": {
+		"@markuplint/html-spec": "4.18.0",
+		"@markuplint/ml-core": "4.18.3",
+		"@markuplint/ml-spec": "4.18.0",
+		"@markuplint/selector": "4.18.1",
+		"@markuplint/shared": "4.18.0",
+		"@markuplint/types": "4.18.0",
+		"@types/debug": "4.1.13",
+		"@ungap/structured-clone": "1.3.0",
+		"ansi-colors": "4.1.3",
+		"chrono-node": "2.9.0",
+		"debug": "4.4.3",
+		"type-fest": "5.6.0"
+	},
+	"gitHead": "c53026c2c600bb304f2088589f67303479e92e62"
+}

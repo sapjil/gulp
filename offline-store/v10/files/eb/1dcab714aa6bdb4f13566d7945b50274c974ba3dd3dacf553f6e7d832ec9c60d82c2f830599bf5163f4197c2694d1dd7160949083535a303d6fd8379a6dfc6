@@ -1,0 +1,47 @@
+{
+	"name": "markuplint",
+	"version": "4.18.3",
+	"description": "An HTML linter for all markup developers",
+	"author": "Yusuke Hirao",
+	"license": "MIT",
+	"repository": "git@github.com:markuplint/markuplint.git",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./lib/index.js",
+			"types": "./lib/index.d.ts"
+		},
+		"./package.json": "./package.json"
+	},
+	"typedoc": {
+		"entryPoint": "./src/index.ts"
+	},
+	"bin": "./bin/markuplint.mjs",
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"dev": "tsc --watch --project tsconfig.build.json",
+		"clean": "tsc --build --clean tsconfig.build.json"
+	},
+	"dependencies": {
+		"@markuplint/cli-utils": "4.18.0",
+		"@markuplint/file-resolver": "4.18.3",
+		"@markuplint/html-parser": "4.18.3",
+		"@markuplint/html-spec": "4.18.0",
+		"@markuplint/i18n": "4.18.0",
+		"@markuplint/ml-ast": "4.18.0",
+		"@markuplint/ml-config": "4.18.1",
+		"@markuplint/ml-core": "4.18.3",
+		"@markuplint/ml-spec": "4.18.0",
+		"@markuplint/rules": "4.18.3",
+		"@markuplint/shared": "4.18.0",
+		"@types/debug": "4.1.13",
+		"chokidar": "5.0.0",
+		"debug": "4.4.3",
+		"meow": "13.2.0",
+		"os-locale": "6.0.2",
+		"strict-event-emitter": "0.5.1",
+		"strip-ansi": "7.2.0",
+		"type-fest": "5.6.0"
+	},
+	"gitHead": "c53026c2c600bb304f2088589f67303479e92e62"
+}

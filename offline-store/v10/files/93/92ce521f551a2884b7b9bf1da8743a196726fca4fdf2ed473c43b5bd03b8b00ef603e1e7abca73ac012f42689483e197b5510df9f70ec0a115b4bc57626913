@@ -1,0 +1,17 @@
+import type { FormattedPrimitiveTypeCreator } from '../types.js';
+/**
+ * Checks whether a string is a valid absolute URL.
+ *
+ * @see https://url.spec.whatwg.org/#syntax-url-absolute
+ *
+ * > An absolute-URL string must be one of the following:
+ * > - a URL-scheme string that is an ASCII case-insensitive match
+ * >   for a special scheme and not an ASCII case-insensitive match for "file",
+ * >   followed by U+003A (:) and a scheme-relative-special-URL string
+ * > - a URL-scheme string that is not an ASCII case-insensitive match
+ * >   for a special scheme, followed by U+003A (:) and a relative-URL string
+ * > - a URL-scheme string that is an ASCII case-insensitive match for "file",
+ * >   followed by U+003A (:) and a scheme-relative-file-URL string
+ *
+ */
+export declare const isAbsURL: FormattedPrimitiveTypeCreator;

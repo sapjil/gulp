@@ -1,0 +1,36 @@
+import { log } from './debug.js';
+import { matched } from './match-result.js';
+/**
+ * Checks a value against multiple type checkers and returns the best result.
+ *
+ * Iterates through the provided checks and returns the first matched result.
+ * If none match, returns the unmatched result with the highest pass count
+ * or furthest offset, providing the most informative error.
+ *
+ * @param value - The string value to check
+ * @param checks - The array of type check functions to try
+ * @returns The matched result or the best unmatched result
+ */
+export function checkMultiTypes(value, checks) {
+    let unmatched;
+    for (const check of checks) {
+        const res = check(value);
+        if (res.matched) {
+            return res;
+        }
+        // @ts-ignore
+        res._fn = check.name;
+        // @ts-ignore
+        log('%s(%d) vs %s(%d)', unmatched?._fn, unmatched?.passCount, res._fn, res.passCount);
+        const passedA = unmatched?.passCount ?? 0;
+        const passedB = res.passCount ?? 0;
+        const offsetA = unmatched?.offset ?? 0;
+        const offsetB = res.offset;
+        if (passedA < passedB || (passedA === passedB && offsetA <= offsetB)) {
+            unmatched = res;
+        }
+    }
+    const result = unmatched ?? matched();
+    log('%d checks result: %O', checks.length, result);
+    return result;
+}

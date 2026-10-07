@@ -1,0 +1,7 @@
+import type { CustomSyntaxChecker } from '../../types.js';
+/**
+ * Validates a month string in the format `YYYY-MM`.
+ *
+ * @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-month-string
+ */
+export declare const checkMonthString: CustomSyntaxChecker;

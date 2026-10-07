@@ -1,0 +1,39 @@
+import { generalImport } from './general-import.js';
+/**
+ * Resolves pretender definitions from files, imported modules, and inline data
+ * in the configuration.
+ *
+ * @param config - The pretenders configuration section from the optimized config
+ * @returns An array of all resolved pretender definitions
+ */
+export async function resolvePretenders(config) {
+    if (!config) {
+        return [];
+    }
+    const data = [];
+    if (config.files) {
+        for (const file of config.files) {
+            const pretenderFile = await generalImport(file);
+            if (!pretenderFile?.data) {
+                continue;
+            }
+            data.push(...pretenderFile.data);
+        }
+    }
+    if (config.imports) {
+        for (const module of config.imports) {
+            const pretenderFile = 
+            // eslint-disable-next-line unicorn/no-await-expression-member
+            (await generalImport(`${module}/package.json`))?.pretenders ??
+                (await generalImport(`${module}/pretenders.json`));
+            if (!pretenderFile?.data) {
+                continue;
+            }
+            data.push(...pretenderFile.data);
+        }
+    }
+    if (config.data) {
+        data.push(...config.data);
+    }
+    return data;
+}

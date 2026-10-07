@@ -1,0 +1,14 @@
+import type { SelectorResult, Specificity } from './types.js';
+type ExtendedPseudoClass = Readonly<Record<string, (content: string) => (el: Element) => SelectorResult>>;
+/**
+ * CSS selector matcher that parses a selector string and matches it against DOM nodes.
+ *
+ * Use {@link createSelector} to create cached instances with extended pseudo-class support.
+ */
+export declare class Selector {
+    #private;
+    constructor(selector: string, extended?: ExtendedPseudoClass);
+    match(el: Node, scope?: ParentNode | null): Specificity | false;
+    search(el: Node, scope?: ParentNode | null): SelectorResult[];
+}
+export {};

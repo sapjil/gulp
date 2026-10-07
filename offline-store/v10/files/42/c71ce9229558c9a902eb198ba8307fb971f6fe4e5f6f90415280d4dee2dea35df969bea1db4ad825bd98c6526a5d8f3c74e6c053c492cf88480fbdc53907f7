@@ -1,0 +1,16 @@
+/**
+ * Checks whether a string is a valid itemprop property name.
+ *
+ * @see https://html.spec.whatwg.org/multipage/microdata.html#defined-property-name
+ *
+ * > The rules above disallow U+003A COLON characters (:) in non-URL values
+ * > because otherwise they could not be distinguished from URLs.
+ * > Values with U+002E FULL STOP characters (.) are reserved for future extensions.
+ * > ASCII whitespace are disallowed because otherwise the values would be parsed as multiple tokens.
+ *
+ */
+export const isItempropName = () => {
+    return value => {
+        return !value.includes(':') && !value.includes('.') && !value.includes(' ');
+    };
+};

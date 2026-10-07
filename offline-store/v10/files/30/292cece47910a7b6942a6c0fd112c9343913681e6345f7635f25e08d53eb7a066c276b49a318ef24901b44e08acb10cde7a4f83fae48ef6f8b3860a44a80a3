@@ -1,0 +1,210 @@
+import type { ChildNode, Hints, MissingNodeReason, RepeatSign, Specs } from './types.js';
+import type { PermittedContentPattern, PermittedContentChoice, PermittedContentOneOrMore, PermittedContentOptional, PermittedContentRequire, PermittedContentTransparent, PermittedContentZeroOrMore, Model } from '@markuplint/ml-spec';
+import type { ReadonlyDeep } from 'type-fest';
+/**
+ * Determines whether a given value is a terminal model (a selector string or an array
+ * of selector strings) rather than a nested array of content model patterns.
+ * Distinguishes between `Model` (leaf-level selectors) and `PermittedContentPattern[]`
+ * (structural pattern arrays that require further recursive evaluation).
+ *
+ * @param model - The value to check, either a terminal model or a nested pattern array.
+ * @returns True if the value is a terminal model (string or string array), false if it is a pattern array.
+ */
+export declare function isModel(model: ReadonlyDeep<Model | PermittedContentPattern[]>): model is ReadonlyDeep<Model>;
+/**
+ * Tests whether a child node matches a CSS selector string using the markuplint
+ * selector engine. Returns whether the node matched and, if not, the deepest
+ * unmatched descendant node for diagnostic purposes.
+ *
+ * @param selector - The CSS selector string to test against.
+ * @param node - The child node to test.
+ * @param specs - The spec data passed to the selector engine for attribute resolution.
+ * @returns An object with `matched: true` if the node matches, or `matched: false` with an optional `not` node.
+ */
+export declare function matches(selector: string, node: ChildNode, specs: Specs): {
+    matched: boolean;
+    not?: undefined;
+} | {
+    matched: boolean;
+    not: ChildNode | undefined;
+};
+/**
+ * Type guard that checks whether a content model pattern is a "require" pattern,
+ * indicating one or more required occurrences of a specific element or model.
+ *
+ * @param content - The content model pattern to check.
+ * @returns True if the pattern has a `require` property.
+ */
+export declare function isRequire(content: ReadonlyDeep<PermittedContentPattern>): content is ReadonlyDeep<PermittedContentRequire>;
+/**
+ * Type guard that checks whether a content model pattern is an "optional" pattern,
+ * indicating zero or one occurrences of a specific element or model.
+ *
+ * @param content - The content model pattern to check.
+ * @returns True if the pattern has an `optional` property.
+ */
+export declare function isOptional(content: ReadonlyDeep<PermittedContentPattern>): content is ReadonlyDeep<PermittedContentOptional>;
+/**
+ * Type guard that checks whether a content model pattern is a "oneOrMore" pattern,
+ * indicating one or more occurrences of a specific element or model.
+ *
+ * @param content - The content model pattern to check.
+ * @returns True if the pattern has a `oneOrMore` property.
+ */
+export declare function isOneOrMore(content: ReadonlyDeep<PermittedContentPattern>): content is ReadonlyDeep<PermittedContentOneOrMore>;
+/**
+ * Type guard that checks whether a content model pattern is a "zeroOrMore" pattern,
+ * indicating zero or more occurrences of a specific element or model.
+ *
+ * @param content - The content model pattern to check.
+ * @returns True if the pattern has a `zeroOrMore` property.
+ */
+export declare function isZeroOrMore(content: ReadonlyDeep<PermittedContentPattern>): content is ReadonlyDeep<PermittedContentZeroOrMore>;
+/**
+ * Type guard that checks whether a content model pattern is a "choice" pattern,
+ * representing an alternation between multiple possible content model branches.
+ *
+ * @param content - The content model pattern to check.
+ * @returns True if the pattern has a `choice` property.
+ */
+export declare function isChoice(content: ReadonlyDeep<PermittedContentPattern>): content is ReadonlyDeep<PermittedContentChoice>;
+/**
+ * Type guard that checks whether a content model pattern is a "transparent" pattern,
+ * indicating the element inherits its parent's content model.
+ *
+ * @param content - The content model pattern to check.
+ * @returns True if the pattern has a `transparent` property.
+ */
+export declare function isTransparent(content: ReadonlyDeep<PermittedContentPattern>): content is ReadonlyDeep<PermittedContentTransparent>;
+/**
+ * Normalizes a quantified content model pattern (require, optional, oneOrMore, or zeroOrMore)
+ * into a uniform representation with the inner model, minimum count, maximum count,
+ * a regex-like repeat sign for debug display, and the appropriate missing-node error type.
+ *
+ * @param pattern - A quantified content model pattern to normalize.
+ * @returns An object with `model`, `min`, `max`, `repeat` sign, and optional `missingType`.
+ */
+export declare function normalizeModel(pattern: ReadonlyDeep<PermittedContentRequire> | ReadonlyDeep<PermittedContentOptional> | ReadonlyDeep<PermittedContentOneOrMore> | ReadonlyDeep<PermittedContentZeroOrMore>): {
+    model: ReadonlyDeep<PermittedContentPattern[] | Model>;
+    min: number;
+    max: number;
+    repeat: RepeatSign;
+    missingType: MissingNodeReason | undefined;
+};
+/**
+ * Merges two Hints objects, combining their properties and selecting the
+ * `missing` hint with the higher `barelyMatchedElements` count (i.e., the
+ * one closest to a successful match) for the most useful error diagnostics.
+ *
+ * @param a - The first hints object.
+ * @param b - The second hints object.
+ * @returns A merged hints object with undefined properties removed.
+ */
+export declare function mergeHints(a: Readonly<Hints>, b: Readonly<Hints>): Partial<{
+    missing: Partial<{
+        barelyMatchedElements?: number;
+        need?: string;
+    }> | undefined;
+    max?: number;
+    not?: ChildNode;
+    transparent?: import("./types.js").Element;
+}>;
+/**
+ * Creates a shallow copy of an object with all `undefined` values removed.
+ * Used to produce clean hint objects for result reporting without
+ * extraneous undefined properties.
+ *
+ * @template T - The object type.
+ * @param object - The source object to clean.
+ * @returns A new object containing only the defined properties of the input.
+ */
+export declare function cleanObject<T extends object>(object: T): Partial<T>;
+/**
+ * Tracks matched and unmatched child nodes during content model validation.
+ * Provides operations for adding matched nodes, backtracking to a locked state,
+ * capping matches at a maximum count, and generating colored debug output.
+ *
+ * The collection maintains an ordered set of original nodes and partitions them
+ * into matched and unmatched sets as the validation algorithm progresses.
+ */
+export declare class Collection {
+    #private;
+    /**
+     * Creates a new Collection from the given child nodes.
+     *
+     * @param origin - The initial list of child nodes to track.
+     */
+    constructor(origin: readonly ChildNode[]);
+    /**
+     * Returns a copy of the currently matched nodes in insertion order.
+     */
+    get matched(): ChildNode[];
+    /**
+     * Returns the number of currently matched nodes.
+     */
+    get matchedCount(): number;
+    /**
+     * Returns a copy of all original nodes in their original order.
+     */
+    get nodes(): ChildNode[];
+    /**
+     * Returns the nodes that have not yet been matched, preserving original order.
+     */
+    get unmatched(): ChildNode[];
+    /**
+     * Adds nodes to the matched set. All nodes must belong to the original
+     * collection; external nodes will cause a ReferenceError.
+     *
+     * @param nodes - The child nodes to mark as matched.
+     * @returns True if the matched set grew (new nodes were added), false otherwise.
+     */
+    addMatched(nodes: ChildNode[]): boolean;
+    /**
+     * Reverts the matched set to the last locked state, discarding
+     * any matches added since the last `lock()` call. Used for backtracking
+     * when a pattern match attempt fails after a zero-match.
+     */
+    back(): void;
+    /**
+     * Saves the current matched set as a checkpoint that `back()` can
+     * revert to. Called after a successful backtrack recovery to preserve
+     * the known-good state.
+     */
+    lock(): void;
+    /**
+     * Trims the matched set to at most `max` entries by removing
+     * the most recently added nodes beyond the limit. Used when the
+     * maximum occurrence count for a pattern is exceeded.
+     *
+     * @param max - The maximum number of matched nodes to retain.
+     */
+    max(max: number): void;
+    /**
+     * Returns a colored string representation of all nodes for debug logging.
+     * Matched nodes are shown in green, locked nodes in bold green, unmatched
+     * extra nodes in red (when highlighted), and transparent-mode nodes in
+     * blue/cyan/magenta variants.
+     *
+     * @param highlightExtraNodes - When true, unmatched nodes are highlighted in red/magenta.
+     * @returns A formatted string like `[ <div>, <span>, <p> ]` with ANSI colors.
+     */
+    toString(highlightExtraNodes?: boolean): string;
+}
+/**
+ * Error class representing an unsupported content model feature.
+ * Thrown when the validation engine encounters a pattern type or
+ * configuration that is not yet implemented.
+ */
+export declare class UnsupportedError extends Error {
+}
+/**
+ * Formats a content model (terminal model or pattern array) and its repeat sign
+ * into a regex-like string for debug logging output. Terminal selectors are
+ * rendered as `<selector>`, arrays of selectors as `(<s1>|<s2>)`, and
+ * nested patterns are recursively formatted.
+ *
+ * @param model - The model or pattern array to format.
+ * @param repeat - The quantifier sign to append (e.g., `+`, `*`, `?`, or `{m,n}`).
+ * @returns A human-readable regex-like string representation of the model.
+ */
+export declare function modelLog(model: ReadonlyDeep<Model | PermittedContentPattern[]>, repeat: RepeatSign): string;
