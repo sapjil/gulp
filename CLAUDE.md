@@ -66,7 +66,13 @@ When adding a new asset type or page, follow this same source→gulp-task→dist
 
 ## `offline` branch
 
-`offline` is branched from `dev` and carries an `offline-store/` (pnpm content-addressable store built with `pnpm fetch`) so the exact locked packages install without network: `pnpm run offline:install` (`scripts/offline-install.mjs`: removes a `node_modules` made with another store, then runs `pnpm install --offline --frozen-lockfile --store-dir offline-store`). On the offline PC use only that command — plain `pnpm install`/`pnpm fetch` try the registry and retry forever. Refresh it (online PC only) with `pnpm run offline:fetch` — it downloads into `offline-store.tmp` and swaps it in only on success, so a failed run leaves the old store intact — whenever `pnpm-lock.yaml` changes, and commit the `offline-store/` change together with the lockfile. Never merge the offline setup (`offline-store/`, `scripts/offline-fetch.mjs`, `scripts/offline-install.mjs`, `.gitattributes`, `supportedArchitectures` in `pnpm-workspace.yaml`, `OFFLINE.md`) back into `dev`/`main`. Caveats (Node/pnpm versions, supported platforms, Windows path length and CRLF, no plain `pnpm install`) are in `OFFLINE.md`.
+`offline` is branched from `dev` and carries an `offline-store/` (pnpm content-addressable store, format `v10`, built with `pnpm fetch`) **and the pnpm 10.28.0 that built it** (`offline-tools/pnpm`), so the exact locked packages install without network and without any pnpm on the PC. Commands (run with **npm**, never with the PC's pnpm):
+
+- `npm run offline:install` — `scripts/offline-install.mjs`: removes a `node_modules` made with another store, then runs the bundled pnpm `install --offline --frozen-lockfile --store-dir offline-store`.
+- `npm run offline:fetch` — online PC only; downloads into `offline-store.tmp` and swaps it in only on success, so a failed run leaves the old store intact. Run it whenever `pnpm-lock.yaml` changes and commit `offline-store/` together with the lockfile.
+- `npm run pnpm -- <args>` — runs the bundled pnpm (`update`, `add -D x`, `audit`, ...).
+
+Why the bundled pnpm: a PC-wide pnpm 11+/12 runs `pnpm install` (online, default `v11` store, supply-chain policy check) before every `pnpm run`, which loops on registry retries offline and cannot read the `v10` store. `verifyDepsBeforeRun: false` in `pnpm-workspace.yaml` stops that auto install even when someone uses `pnpm run`. Never merge the offline setup (`offline-store/`, `offline-tools/`, `scripts/offline-*.mjs`, `scripts/_pnpm.mjs`, `scripts/pnpm.mjs`, `.gitattributes`, `supportedArchitectures` and `verifyDepsBeforeRun` in `pnpm-workspace.yaml`, `OFFLINE.md`) back into `dev`/`main`. Caveats (Node version, supported platforms, Windows path length and CRLF) and a step-by-step guide are in `OFFLINE.md`.
 
 ## Commit conventions
 
