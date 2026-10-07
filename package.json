@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "offline:fetch": "node scripts/offline-fetch.mjs",
-    "offline:install": "pnpm install --offline --frozen-lockfile --store-dir offline-store"
+    "offline:install": "node scripts/offline-install.mjs"
   },
   "keywords": [],
   "author": "",
