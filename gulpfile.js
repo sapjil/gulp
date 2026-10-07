@@ -28,6 +28,7 @@ import path from 'path';
 import newer from 'gulp-newer';
 import tailwindcss from 'tailwindcss';
 import generatemap from 'gulp-sitemap';
+import { exec as markuplint } from 'markuplint';
 
 const paths_src = {
   njk: './src/html/pages/**/*.njk',
@@ -291,13 +292,25 @@ const syncFiles = (done) => {
 };
 export { syncFiles };
 
-const markuplintTask = (done) => {
-  gulp
-    .src('./dist/**/*.html')
-    .pipe(markuplint({ rulesetPath: './.markuplintrc' }));
-  done();
+// dist 의 HTML 을 markuplint(.markuplintrc.json)로 검사한다. html 태스크 뒤에 실행한다.
+// 기본 시리즈에는 포함하지 않으며, error 가 하나라도 있으면 태스크가 실패한다.
+const lintHtml = async () => {
+  const results = await markuplint({ files: ['./dist/**/*.html'] });
+  let errors = 0;
+  for (const result of results) {
+    for (const v of result.violations) {
+      const file = path.relative(process.cwd(), result.filePath);
+      console.log(
+        `${file}:${v.line}:${v.col} ${v.severity} ${v.message} (${v.ruleId})`,
+      );
+      if (v.severity === 'error') errors += 1;
+    }
+  }
+  if (errors > 0) {
+    throw new Error(`markuplint: HTML 오류 ${errors}건이 있습니다.`);
+  }
 };
-export { markuplintTask };
+export { lintHtml };
 
 const sitemap = () => {
   return gulp
