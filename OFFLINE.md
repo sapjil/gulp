@@ -130,6 +130,9 @@ pnpm run offline:install
 
 | 증상 | 원인 | 해결 |
 |---|---|---|
+| `GET https://registry.npmjs.org/... error (ENOTFOUND). Will retry in 1 minute.` 같은 줄이 계속 반복됩니다. | 인터넷이 없는데 패키지를 **인터넷에서 받으려는** 상태입니다. 오프라인 PC에서 `pnpm install`, `pnpm add`, `pnpm update`, `pnpm fetch`, `pnpm run offline:fetch` 중 하나를 실행했을 때 나타납니다. 같이 보이는 `Progress: ... reused 144` 의 숫자는 그 PC의 기본 저장소에 이미 있던 패키지 수일 가능성이 큽니다. `offline-store/`가 비어 있다는 뜻이 아닙니다. | `Ctrl + C`로 중단하고 **`pnpm run offline:install`** 만 실행합니다. 로그에 `registry.npmjs.org`가 보이면 잘못 실행된 것입니다. |
+| `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`, 또는 "modules directory will be removed ... Proceed?" 라고 묻습니다. | 일반 `pnpm install`로 만든 `node_modules`가 남아 있어서, pnpm이 저장소 위치가 다르다고 판단합니다. | 현재 `pnpm run offline:install`은 이런 `node_modules`를 자동으로 지우고 다시 설치합니다. 예전 스크립트라면 `node_modules` 폴더를 지우고 다시 실행하세요. |
+| `offline-store` 폴더가 없어졌거나 비어 있습니다. | 예전 버전의 `offline:fetch`를 인터넷이 없는 PC에서 실행하면 받기에 실패하면서 기존 저장소를 먼저 지웠습니다. (현재 버전은 임시 폴더에 받고 성공했을 때만 교체하므로 지워지지 않습니다.) | git을 쓰면 `git checkout -- offline-store`, 아니면 프로젝트 폴더를 다시 복사합니다. |
 | `ERR_PNPM_NO_OFFLINE_TARBALL` | 락파일은 바뀌었는데 `offline-store/`가 그대로입니다. | 온라인 PC에서 B-4단계(`pnpm run offline:fetch`)를 하고 함께 커밋한 뒤 다시 받습니다. |
 | `ERR_PNPM_OUTDATED_LOCKFILE` | `package.json`과 `pnpm-lock.yaml`이 서로 맞지 않습니다. | 온라인 PC에서 `pnpm install`로 락파일을 맞춘 뒤 B-4단계부터 진행합니다. |
 | `pnpm: command not found` (또는 인식되지 않음) | pnpm이 설치되어 있지 않습니다. | A-1단계의 준비물을 설치합니다. |
@@ -144,7 +147,7 @@ pnpm run offline:install
    - pnpm 10.x (10.28.0으로 만들고 검증했습니다. 다른 메이저 버전은 저장소 형식이 달라 검증하지 않았습니다.)
 2. **지원 플랫폼 밖에서는 설치가 실패합니다.** `sharp`와 `@parcel/watcher`는 OS와 CPU별로 다른 네이티브 패키지를 씁니다. `pnpm-workspace.yaml`의 `supportedArchitectures`에 있는 범위(linux/macOS/Windows × x64/arm64 × glibc/musl)만 들어 있습니다. 범위를 바꾸면 `pnpm run offline:fetch`를 다시 실행하세요.
 3. **락파일과 `offline-store/`가 어긋나면 설치가 실패합니다.** 락파일을 바꾸는 경우는 패키지 업데이트가 필요할 때에 한하며, 이때는 반드시 `pnpm run offline:fetch`를 실행해서 `offline-store/`를 함께 갱신하세요. 그렇지 않으면 `ERR_PNPM_NO_OFFLINE_TARBALL`이 납니다. 락파일을 바꾸는 커밋에는 `offline-store/` 변경을 반드시 함께 넣으세요.
-4. **`pnpm install`, `pnpm add`, `pnpm update`를 그대로 쓰지 마세요.** 네트워크를 쓰려고 시도하고, 오프라인에서는 실패하거나 락파일을 바꿀 수 있습니다. 오프라인 PC에서는 `pnpm run offline:install`만 사용합니다. 패키지 추가와 갱신은 온라인 PC에서 하고 저장소를 다시 만듭니다.
+4. **오프라인 PC에서는 `pnpm run offline:install`만 사용하세요.** `pnpm install`, `pnpm add`, `pnpm update`, `pnpm fetch`는 인터넷에서 받으려고 시도해서 재시도 경고가 계속 반복되고, `offline:fetch`도 인터넷이 필요한 명령입니다. 패키지 추가와 갱신은 온라인 PC에서 하고 저장소를 다시 만듭니다. `offline:fetch`는 임시 폴더에 받고 성공했을 때만 `offline-store/`를 교체하므로, 실수로 실행해 실패해도 기존 저장소는 남습니다.
 5. **Windows에서는 저장소를 짧은 경로에 두세요.** 저장소 안 파일의 상대 경로가 최대 158자입니다. Windows의 경로 길이 제한은 260자라서 `C:\gulp`처럼 짧은 위치에 풀고, git을 쓴다면 `git config core.longpaths true`를 설정하세요.
 6. **줄바꿈 변환이 일어나면 설치가 실패합니다.** pnpm은 저장소 파일의 해시로 무결성을 검사합니다. Windows의 `core.autocrlf`가 파일을 바꾸면 깨지므로 `.gitattributes`의 `offline-store/** -text -diff` 설정을 지우지 마세요. 압축 파일로 옮길 때도 줄바꿈을 변환하는 도구는 쓰지 마세요.
 7. **`offline-store/` 파일을 직접 수정하거나 삭제하지 마세요.** 해시 이름으로 저장된 파일이라 일부만 바뀌어도 설치가 실패합니다. 문제가 있으면 `pnpm run offline:fetch`로 다시 만듭니다.
@@ -161,6 +164,7 @@ pnpm run offline:install
 
 ## 검증한 내용
 
+- 오프라인 PC에서 흔한 실수를 재현해서 확인했습니다. (1) 일반 `pnpm install` 실행 시 사용자 로그와 같은 형태의 재시도 경고가 반복됨, (2) 그 뒤 `offline:install`이 `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`로 중단되던 것이 자동 정리 후 성공으로 바뀜, (3) 인터넷이 없는 상태에서 `offline:fetch`를 실행하면 실패하지만 `offline-store/`(12,808개 파일)는 그대로 남음.
 - 패키지 하나를 추가한 뒤 `offline:fetch`로 저장소를 다시 만들고, 네트워크를 차단한 상태에서 `offline:install`이 되는 것까지 B 절차를 실제로 따라 해서 확인했습니다. 이때 바뀐 파일은 `package.json`, `pnpm-lock.yaml`, 인덱스 파일 651개였습니다.
 - 네트워크를 차단한 상태(존재하지 않는 프록시 지정 + `--offline`)에서 새 폴더에 `offline:install` 후 `lintSass`, `compileSass`, `minifyScripts`, `html`, `sitemap`, 기본 태스크, `minimage`(sharp)가 통과했습니다.
 - 검증 환경은 linux-x64, Node 22.22, pnpm 10.28.0입니다. macOS와 Windows에서는 실제 설치를 시험하지 못했습니다. 해당 플랫폼용 패키지가 저장소에 들어 있다는 것까지만 확인했습니다.
