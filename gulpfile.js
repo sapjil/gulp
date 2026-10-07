@@ -284,33 +284,59 @@ const syncFiles = (done) => {
   gulp.watch(paths_src.image, series(copyImage, browserReload));
   gulp.watch(
     [paths_src.njk, paths_src.njktemp],
-    series(compileSass, html, browserReload),
+    series(compileSass, html, browserReload, reportHtml),
   );
-  gulp.watch(paths_src.css, series(lintSass, compileSass, html, browserReload));
+  gulp.watch(
+    paths_src.css,
+    series(lintSass, compileSass, html, browserReload, reportHtml),
+  );
   gulp.watch(paths_src.js, series(minifyScripts, browserReload));
   done();
 };
 export { syncFiles };
 
-// dist 의 HTML 을 markuplint(.markuplintrc.json)로 검사한다. html 태스크 뒤에 실행한다.
-// 기본 시리즈에는 포함하지 않으며, error 가 하나라도 있으면 태스크가 실패한다.
-const lintHtml = async () => {
+// dist 의 HTML 을 markuplint(.markuplintrc.json)로 검사하고 위반을 출력한다. 오류 개수를 반환한다.
+const checkHtml = async () => {
   const results = await markuplint({ files: ['./dist/**/*.html'] });
   let errors = 0;
   for (const result of results) {
     for (const v of result.violations) {
       const file = path.relative(process.cwd(), result.filePath);
+      // 설정 파일이 깨지면 markuplint 는 예외 대신 warning(config-error)으로 알리므로 오류로 취급한다.
+      const isError = v.severity === 'error' || v.ruleId === 'config-error';
       console.log(
-        `${file}:${v.line}:${v.col} ${v.severity} ${v.message} (${v.ruleId})`,
+        `${file}:${v.line}:${v.col} ${isError ? 'error' : v.severity} ${v.message} (${v.ruleId})`,
       );
-      if (v.severity === 'error') errors += 1;
+      if (isError) errors += 1;
     }
   }
+  return errors;
+};
+
+// 단독 실행용: html 태스크 뒤에 실행하며, error 가 하나라도 있으면 태스크가 실패한다.
+const lintHtml = async () => {
+  const errors = await checkHtml();
   if (errors > 0) {
     throw new Error(`markuplint: HTML 오류 ${errors}건이 있습니다.`);
   }
 };
 export { lintHtml };
+
+// 기본 시리즈와 watch 용: 위반을 출력만 하고 빌드는 계속 진행한다.
+// markuplint 자체가 실패해도(설정 오류 등) 빌드를 멈추지 않고 메시지만 남긴다.
+const reportHtml = async () => {
+  try {
+    const errors = await checkHtml();
+    if (errors > 0) {
+      console.log(
+        `markuplint: HTML 오류 ${errors}건 (보고만 하고 빌드는 계속합니다. 실패로 처리하려면 npx gulp lintHtml)`,
+      );
+    }
+  } catch (error) {
+    console.error(`markuplint 실행 실패 (빌드는 계속합니다): ${error.message}`);
+  }
+};
+export { reportHtml };
 
 const sitemap = () => {
   return gulp
@@ -332,5 +358,6 @@ export default series(
   compileSass,
   minifyScripts,
   html,
+  reportHtml,
   syncFiles,
 );
