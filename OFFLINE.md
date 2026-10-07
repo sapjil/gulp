@@ -158,7 +158,7 @@ npm run offline:install
 6. **줄바꿈 변환이 일어나면 설치가 실패합니다.** pnpm은 저장소 파일의 해시로 무결성을 검사합니다. Windows의 `core.autocrlf`가 파일을 바꾸면 깨지므로 `.gitattributes`의 `offline-store/** -text -diff`, `offline-tools/** -text -diff` 설정을 지우지 마세요. 압축 파일로 옮길 때도 줄바꿈을 변환하는 도구는 쓰지 마세요.
 7. **`offline-store/`와 `offline-tools/` 파일을 직접 수정하거나 삭제하지 마세요.** 해시 이름으로 저장된 파일이라 일부만 바뀌어도 설치가 실패합니다. 문제가 있으면 `npm run offline:fetch`로 `offline-store/`를 다시 만들거나, `offline-tools`는 `git checkout -- offline-tools`로 되돌립니다.
 8. **`node_modules/`를 복사해서 옮기지 마세요.** 네이티브 패키지가 플랫폼에 종속되어 다른 OS에서는 동작하지 않습니다. 항상 대상 PC에서 `npm run offline:install`을 실행합니다.
-9. **용량이 큽니다.** `offline-store/`는 작업 폴더에서 약 289MB(파일 12,808개), git에서 약 93MB이고, `offline-tools/pnpm`은 약 21MB(파일 1,068개)입니다. 가장 큰 파일이 19MB라서 GitHub의 파일당 100MB 제한에는 걸리지 않습니다. `offline:fetch`는 저장소를 처음부터 다시 만들기 때문에, 패키지가 그대로여도 `offline-store/v10/index/`의 인덱스 파일 651개가 시간 기록(`checkedAt`)만 바뀐 채 "수정됨"으로 나옵니다(합계 약 2.4MB). 큰 패키지 파일은 같은 내용이면 이력에 다시 쌓이지 않고, 새로 필요한 패키지 파일만 추가됩니다.
+9. **용량이 큽니다.** `offline-store/`는 작업 폴더에서 약 309MB(파일 15,934개), git에서 약 96MB이고, `offline-tools/pnpm`은 약 21MB(파일 1,068개)입니다. 가장 큰 파일이 19MB라서 GitHub의 파일당 100MB 제한에는 걸리지 않습니다. `offline:fetch`는 저장소를 처음부터 다시 만들기 때문에, 패키지가 그대로여도 `offline-store/v10/index/`의 인덱스 파일 715개가 시간 기록(`checkedAt`)만 바뀐 채 "수정됨"으로 나옵니다(합계 약 3.1MB). 큰 패키지 파일은 같은 내용이면 이력에 다시 쌓이지 않고, 새로 필요한 패키지 파일만 추가됩니다.
 10. **알려진 취약점도 락파일 그대로 들어 있습니다.** 이 저장소는 락파일을 고정해서 받아 둔 것이라 보안 갱신이 자동으로 반영되지 않습니다. `npm run pnpm -- audit`는 온라인이 필요하므로 온라인 PC에서 확인하고, 갱신했다면 `npm run offline:fetch`를 다시 실행하세요.
 11. **이 저장소 범위는 gulp 빌드에 필요한 패키지와 pnpm입니다.** Node와 브라우저는 포함하지 않습니다. `browser-sync`가 여는 브라우저는 오프라인 PC에 따로 있어야 합니다.
 12. **번들 pnpm 버전을 바꾸면 `offline-store/`도 다시 만들어야 합니다.** `offline-store/`의 형식(`v10`)은 번들 pnpm 10.28.0에 맞춰져 있습니다. pnpm 11 이상은 형식이 달라 같은 저장소를 쓰지 못합니다. 번들을 바꿀 때는 `offline-tools/pnpm`을 교체하고 `offline-store/`를 새로 만들어 함께 검증하세요.
@@ -173,6 +173,6 @@ npm run offline:install
 
 - 새로 clone한 폴더에서 **PC에 pnpm이 없는 상태(PATH에 node만)** 로 네트워크를 차단하고 `npm run offline:install`을 실행해, 2.7초에 설치되고 `lintSass`, `compileSass`, `minifyScripts`, `html`, `sitemap` 빌드가 통과했습니다.
 - **PC에 pnpm 12.9.1이 설치된 상태**를 재현했습니다. (1) 기존 방식(`pnpm run offline:install`)은 자동 설치가 먼저 실행되어 기본 저장소(`v11`)에서 받으려 하고 공급망 정책 검사가 걸렸습니다. 사용자 로그와 같은 현상입니다. (2) `verifyDepsBeforeRun: false`를 넣은 뒤에는 `pnpm run offline:install`도 곧바로 스크립트로 들어가 번들 pnpm 10.28.0으로 설치가 성공했습니다. (3) pnpm 12가 만든 상태에서도 `npm run offline:install`이 성공했습니다.
-- `npm run offline:fetch`로 번들 pnpm이 같은 형식(`v10`)의 저장소를 다시 만들고, 인터넷이 없는 상태에서는 실패하지만 기존 `offline-store/`(12,808개 파일)가 그대로 남는 것을 확인했습니다.
+- `npm run offline:fetch`로 번들 pnpm이 같은 형식(`v10`)의 저장소를 다시 만들고, 인터넷이 없는 상태에서는 실패하지만 기존 `offline-store/`(15,934개 파일)가 그대로 남는 것을 확인했습니다.
 - 패키지 하나를 추가한 뒤 `offline:fetch`로 저장소를 다시 만들고, 네트워크를 차단한 상태에서 `offline:install`이 되는 것까지 B 절차를 실제로 따라 해서 확인했습니다.
 - 검증 환경은 linux-x64, Node 22.22입니다. macOS와 Windows에서는 실제 설치를 시험하지 못했습니다. 해당 플랫폼용 패키지가 저장소에 들어 있다는 것까지만 확인했습니다. 사용자가 보고한 Windows PC의 로그는 위 pnpm 12 재현과 같은 형태이며, Windows에서의 실제 성공 여부는 최신 브랜치로 다시 시험해 주셔야 합니다.
