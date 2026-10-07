@@ -9,5 +9,10 @@
         "required-attr": ["src", "alt"]
       }
     }
-  ]
+  ],
+  "overrides": {
+    "dist/component.html": { "rules": { "required-h1": false } },
+    "dist/base.html": { "rules": { "required-h1": false } },
+    "dist/info/index.html": { "rules": { "required-h1": false } }
+  }
 }
