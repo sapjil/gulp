@@ -29,7 +29,7 @@
 - [x] tailwind 적용
 - [x] sitemap 생성 적용
 - [x] csscomb 충돌 해결(생성된 css에서 tailwind 영역은 미처리)
-- [x] markuplint 적용: 기본 작업에서 보고(`reportHtml`), 단독 실패 검사는 `npx gulp lintHtml` (현재 템플릿의 기존 오류 2건(`width="200px"`, `height="auto"`)은 그대로 남겨 둠. include용 페이지 3개(component, base, info)는 `required-h1` 예외 자세한 내용은 CLAUDE.md)
+- [x] markuplint 적용: 기본 작업에서 보고(`reportHtml`), 단독 실패 검사는 `npx gulp lintHtml`. include용 페이지 3개(component, base, info)는 `required-h1` 예외. 이미지 매크로(`image`)는 `width`/`height`를 값이 있을 때만 출력하며 단위 없는 정수(`200`)만 전달합니다. 자세한 내용은 CLAUDE.md
 
 ## tailwind 사용여부 설정
 
