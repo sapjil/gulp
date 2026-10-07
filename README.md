@@ -22,7 +22,8 @@
 인터넷이 없는 PC에서도 현재 패키지 버전 그대로 설치할 수 있도록 `offline-store/`를 포함한 브랜치입니다.
 
 - 설치: `pnpm run offline:install`, 그 다음 `npx gulp`
-- 락파일을 바꾼 뒤: `pnpm run offline:fetch`로 저장소를 다시 만들고 함께 커밋
+- 패키지 업데이트가 필요한 경우(락파일을 바꾸는 경우는 이때에 한함): 온라인 PC에서 `pnpm run offline:fetch`로 저장소를 다시 만들고 함께 커밋
+- 처음 쓰는 분을 위한 단계별 안내와 문제 해결도 `OFFLINE.md`에 있습니다.
 - **사용상 주의점(Node/pnpm 버전, 지원 플랫폼, Windows 경로와 줄바꿈 등)은 [OFFLINE.md](./OFFLINE.md)를 반드시 읽으세요.**
 
 # TODO
