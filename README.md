@@ -3,6 +3,7 @@
 - 시작: `npx gulp`
 - HTML 생성 및 관리: `Nunjucks`
 - SCSS 린트: `npx gulp lintSass` (기본 작업에 포함, 오류 시 빌드 중단)
+- HTML 린트: `npx gulp html` 다음에 `npx gulp lintHtml` (markuplint, 기본 작업에는 미포함, 오류 시 실패)
 - 이미지 압축: `npx gulp minimage`
 - SiteMap 생성: `npx gulp sitemap`
 
@@ -28,7 +29,7 @@
 - [x] tailwind 적용
 - [x] sitemap 생성 적용
 - [x] csscomb 충돌 해결(생성된 css에서 tailwind 영역은 미처리)
-- [ ] markuplint 적용: 테스트중
+- [x] markuplint 적용: `npx gulp lintHtml` (현재 템플릿의 기존 오류 5건은 그대로 남겨 둠. 자세한 내용은 CLAUDE.md)
 
 ## tailwind 사용여부 설정
 
