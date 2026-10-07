@@ -16,3 +16,7 @@ supportedArchitectures:
   os: [linux, darwin, win32]
   cpu: [x64, arm64]
   libc: [glibc, musl]
+
+# PC 에 설치된 pnpm 이 11 이상이면 `pnpm run` 앞에서 자동으로 `pnpm install`(온라인, 기본 저장소)을 실행해서
+# 인터넷이 없는 PC 에서 재시도 경고가 반복된다. 이를 막는다. (offline 브랜치 전용)
+verifyDepsBeforeRun: false

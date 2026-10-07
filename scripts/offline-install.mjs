@@ -1,10 +1,8 @@
-// offline-store/ 만 사용해서 네트워크 없이 설치한다. (pnpm run offline:install)
-import { spawnSync } from 'node:child_process';
+// offline-store/ 만 사용해서 네트워크 없이 설치한다. (npm run offline:install)
 import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { root, runPnpm } from './_pnpm.mjs';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
 const store = join(root, 'offline-store');
 const modules = join(root, 'node_modules');
 const norm = (p) => {
@@ -32,11 +30,7 @@ if (existsSync(meta)) {
   }
 }
 
-const r = spawnSync(
-  'pnpm',
-  ['install', '--offline', '--frozen-lockfile', '--store-dir', store],
-  { cwd: root, stdio: 'inherit', shell: process.platform === 'win32' },
-);
+const r = runPnpm(['install', '--offline', '--frozen-lockfile', '--store-dir', store]);
 if (r.status !== 0) {
   console.error(
     '\n[offline:install] 설치에 실패했습니다. OFFLINE.md 의 "문제 해결"을 확인하세요.\n' +

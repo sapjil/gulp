@@ -2,12 +2,10 @@
 // 락파일이 바뀔 때마다 실행하고 offline-store/ 변경분을 함께 커밋한다.
 // 임시 폴더에 먼저 받고, 성공했을 때만 기존 offline-store/ 와 교체한다.
 // (인터넷이 없는 PC 에서 실수로 실행해도 기존 offline-store/ 는 지워지지 않는다.)
-import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, renameSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { root, runPnpm } from './_pnpm.mjs';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
 const store = join(root, 'offline-store');
 const tmp = join(root, 'offline-store.tmp');
 const modules = join(root, 'node_modules');
@@ -22,11 +20,7 @@ const count = (dir) =>
 rmSync(tmp, { recursive: true, force: true });
 rmSync(modules, { recursive: true, force: true });
 
-const r = spawnSync(
-  'pnpm',
-  ['fetch', '--frozen-lockfile', '--store-dir', tmp],
-  { cwd: root, stdio: 'inherit', shell: process.platform === 'win32' },
-);
+const r = runPnpm(['fetch', '--frozen-lockfile', '--store-dir', tmp]);
 rmSync(modules, { recursive: true, force: true });
 
 if (r.status !== 0 || !existsSync(tmp) || count(tmp) === 0) {
