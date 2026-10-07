@@ -174,6 +174,7 @@ npm run offline:install
 
 - `dev`의 markuplint 4.18.3 설치와 `lintHtml` 태스크를 `offline`에 머지한 뒤(패키지 715개, 파일 15,934개), 새로 clone한 폴더에서 네트워크 차단·PATH에 node만 있는 상태로 `npm run offline:install`을 실행했습니다. 설치(3.1초), 기존 빌드 태스크, `minimage`(sharp), `lintHtml`(당시 템플릿의 기존 오류 5건 검출. 이후 `dev`에서 템플릿을 고쳐 해소됨), 기본 빌드가 통과했고, pnpm 12.9.1의 `pnpm run offline:install`과 기본 저장소로 만든 `node_modules`가 남은 상태에서도 성공했습니다.
 - 새로 clone한 폴더에서 **PC에 pnpm이 없는 상태(PATH에 node만)** 로 네트워크를 차단하고 `npm run offline:install`을 실행해, 2.7초에 설치되고 `lintSass`, `compileSass`, `minifyScripts`, `html`, `sitemap` 빌드가 통과했습니다.
+- `dev`의 `reportHtml`, `required-h1` 예외, `image` 매크로 수정을 `offline`에 다시 머지한 뒤(락파일 변경이 없어 `offline-store/`는 그대로), 같은 방식으로 새 clone에서 검증했습니다. 네트워크 차단·PATH에 node만 있는 상태의 `npm run offline:install`(2.8초), 기존 빌드 태스크와 `minimage`, 기본 빌드(`reportHtml`이 오류 없이 통과), `lintHtml`(오류 0건, 종료 코드 0), 빌드된 `index.html`의 `<img width="200">`(빈 `width`/`height` 속성 0건), pnpm 12.9.1의 `pnpm run offline:install`이 모두 통과했습니다.
 - **PC에 pnpm 12.9.1이 설치된 상태**를 재현했습니다. (1) 기존 방식(`pnpm run offline:install`)은 자동 설치가 먼저 실행되어 기본 저장소(`v11`)에서 받으려 하고 공급망 정책 검사가 걸렸습니다. 사용자 로그와 같은 현상입니다. (2) `verifyDepsBeforeRun: false`를 넣은 뒤에는 `pnpm run offline:install`도 곧바로 스크립트로 들어가 번들 pnpm 10.28.0으로 설치가 성공했습니다. (3) pnpm 12가 만든 상태에서도 `npm run offline:install`이 성공했습니다.
 - `npm run offline:fetch`로 번들 pnpm이 같은 형식(`v10`)의 저장소를 다시 만들고, 인터넷이 없는 상태에서는 실패하지만 기존 `offline-store/`(15,934개 파일)가 그대로 남는 것을 확인했습니다.
 - 패키지 하나를 추가한 뒤 `offline:fetch`로 저장소를 다시 만들고, 네트워크를 차단한 상태에서 `offline:install`이 되는 것까지 B 절차를 실제로 따라 해서 확인했습니다.
