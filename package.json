@@ -17,8 +17,8 @@
     "not dead"
   ],
   "devDependencies": {
-    "@markuplint/nunjucks-parser": "^4.18.3",
-    "autoprefixer": "^10.6.1",
+    "@markuplint/nunjucks-parser": "^4.18.4",
+    "autoprefixer": "^10.6.2",
     "browser-sync": "^3.0.4",
     "cssnano": "^8.0.10",
     "gulp": "^5.0.1",
@@ -40,9 +40,9 @@
     "gulp-terser": "^2.1.0",
     "jshint": "^2.13.6",
     "jshint-stylish": "^2.2.1",
-    "markuplint": "^4.18.3",
-    "prettier": "^3.9.9",
-    "sass": "^1.105.1",
+    "markuplint": "^4.18.5",
+    "prettier": "^3.10.1",
+    "sass": "^1.108.2",
     "sharp": "^0.35.5",
     "stylelint": "^16.26.1",
     "stylelint-config-recommended": "^14.0.1",
