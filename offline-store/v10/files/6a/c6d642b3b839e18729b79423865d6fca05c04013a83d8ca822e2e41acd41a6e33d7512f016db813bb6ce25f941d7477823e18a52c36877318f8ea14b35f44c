@@ -1,0 +1,94 @@
+import type { MLFile } from './ml-file/index.js';
+import type { ConfigSet } from './types.js';
+import type { OptimizedConfig } from '@markuplint/ml-config';
+import type { Nullable } from '@markuplint/shared';
+/**
+ * Manages loading, caching, and resolving markuplint configuration files.
+ *
+ * Handles `extends` chains, plugins, presets, overrides, and circular reference detection.
+ * Configuration files are searched via cosmiconfig and cached by file path.
+ */
+export declare class ConfigProvider {
+    #private;
+    /**
+     * Clears every cached and stored configuration: the resolved-config cache, the store of loaded
+     * and registered configurations, the plugin-resolution cache and the shared explorer's caches.
+     *
+     * `resolve()` with `cache` set to `false` calls this as its first step. That is too late for a
+     * caller that has just registered a configuration with {@link set}: the clearing discards it.
+     * Such a caller that wants a fresh re-read calls this method first, then {@link set} and
+     * {@link search}, then `resolve()` with `cache` left `true`: what was registered after the
+     * clearing survives to `resolve()` (#4415).
+     *
+     * The plugin-resolution cache and the explorer are shared by every `ConfigProvider` in the
+     * process, so clearing them here affects other instances too. They are only caches, and a
+     * later call reads the files again.
+     */
+    invalidate(): void;
+    /**
+     * Runs `fn` after every earlier `runExclusive()` call on this instance has settled. The queue
+     * is this provider's own, held in `#queue`.
+     *
+     * Wrap a whole {@link invalidate} → {@link set} / {@link search} → `resolve()` sequence in it:
+     * an overlapping call on the same provider (two watch-triggered re-resolves of one engine close
+     * together, or callers that share one provider) can then not clear the configurations this call
+     * has just registered and not yet consumed (#4415).
+     *
+     * Only calls that go through this method are serialized: a direct `set()`, `search()` or
+     * `resolve()` call on the same provider is not queued. `fn` must not call `runExclusive()` on
+     * the same provider and wait for it: the inner call waits for `fn` to settle, so it never ends.
+     *
+     * @template T - The type `fn` resolves to
+     * @param fn - The sequence to run exclusively
+     * @returns What `fn` resolves to; a rejection of `fn` does not block the next call
+     */
+    runExclusive<T>(fn: () => Promise<T>): Promise<T>;
+    /**
+     * Recursively loads a configuration and all its `extends` dependencies.
+     *
+     * @param key - The config file path or module name to load
+     * @param cache - Whether to use cached results
+     * @param referrer - The file path of the config that referenced this key
+     * @param depth - Current recursion depth (for circular reference detection)
+     * @returns A set of loaded config keys and any errors encountered
+     */
+    recursiveLoad(key: string, cache: boolean, referrer: string, depth?: number): Promise<{
+        stack: Set<string>;
+        errs: Error[];
+    }>;
+    /**
+     * Resolves the full configuration for a target file by merging all named configs,
+     * resolving plugins, and applying file-specific overrides.
+     *
+     * With `cache` set to `false` it first clears the store, which also discards any configuration
+     * the caller has just registered with {@link set}. A caller that registers inline
+     * configurations and wants a fresh re-read calls {@link invalidate} before registering them and
+     * passes `cache` as `true` (#4415).
+     *
+     * @param targetFile - The file being linted
+     * @param names - Config file paths or module names to merge
+     * @param cache - Whether to use cached results
+     * @returns The fully resolved configuration set including plugins and errors
+     */
+    resolve(targetFile: Readonly<MLFile>, names: readonly Nullable<string>[], cache?: boolean): Promise<ConfigSet>;
+    /**
+     * Searches for a markuplint configuration file starting from the target file's directory
+     * and going up through its ancestors; the nearest one wins (see `search` in `cosmiconfig.ts`).
+     *
+     * @param targetFile - The file whose directory to search from
+     * @returns The file path of the found config, or `null` if none was found
+     */
+    search(targetFile: Readonly<MLFile>): Promise<string | null>;
+    /**
+     * Stores a pre-built configuration in the provider's internal store.
+     *
+     * @param config - The optimized configuration to store
+     * @param key - An optional key to store the config under; auto-generated if omitted
+     * @returns The key under which the config was stored
+     */
+    set(config: OptimizedConfig, key?: string): string;
+    private _load;
+    private _mergeConfigs;
+    private _pathResolve;
+    private _validateConfig;
+}

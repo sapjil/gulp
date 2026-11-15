@@ -1,0 +1,27 @@
+{
+	"name": "@markuplint/ml-ast",
+	"version": "4.18.4",
+	"description": "The markuplint AST types.",
+	"repository": "git@github.com:markuplint/markuplint.git",
+	"author": "Yusuke Hirao <yusukehirao@me.com>",
+	"license": "MIT",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./lib/index.js",
+			"types": "./lib/index.d.ts"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"typedoc": {
+		"entryPoint": "./src/index.ts"
+	},
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"dev": "tsc --watch --project tsconfig.build.json",
+		"clean": "tsc --build --clean  tsconfig.build.json"
+	},
+	"gitHead": "b5fbb4572f7313e3c80735da1677d33cb82e6e2f"
+}

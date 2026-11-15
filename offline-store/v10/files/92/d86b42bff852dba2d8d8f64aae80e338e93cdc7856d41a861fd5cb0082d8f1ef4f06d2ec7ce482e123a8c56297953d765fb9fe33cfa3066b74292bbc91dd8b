@@ -1,0 +1,45 @@
+{
+	"name": "@markuplint/ml-spec",
+	"version": "4.18.4",
+	"description": "Types and schema that specs of the Markup languages for markuplint",
+	"repository": "git@github.com:markuplint/markuplint.git",
+	"author": "Yusuke Hirao <yusukehirao@me.com>",
+	"license": "MIT",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./lib/index.js",
+			"types": "./lib/index.d.ts"
+		}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"typedoc": {
+		"entryPoint": "./src/index.ts"
+	},
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"dev": "tsc --watch --project tsconfig.build.json",
+		"clean": "tsc --build --clean tsconfig.build.json",
+		"schema": "run-s schema:json schema:content-models schema:attributes schema:aria schema:prettier schema:eslint schema:prettier",
+		"schema:json": "tsx ./gen/gen.ts",
+		"schema:content-models": "npx json2ts ./schemas/content-models.schema.json > ./src/types/permitted-structures.ts",
+		"schema:attributes": "npx json2ts ./schemas/attributes.schema.json --cwd ./schemas > ./src/types/attributes.ts",
+		"schema:aria": "npx json2ts ./schemas/aria.schema.json --cwd ./schemas > ./src/types/aria.ts",
+		"schema:eslint": "npx eslint --fix \"./src/types/*.ts\"",
+		"schema:prettier": "npx prettier --write \"./schemas/*.json\" \"./src/types/*.ts\" --log-level warn"
+	},
+	"dependencies": {
+		"@markuplint/ml-ast": "4.18.4",
+		"@markuplint/types": "4.18.4",
+		"dom-accessibility-api": "0.7.1",
+		"is-plain-object": "5.1.0",
+		"type-fest": "5.10.0"
+	},
+	"devDependencies": {
+		"@markuplint/test-tools": "4.18.4",
+		"json-schema-to-typescript": "15.0.4"
+	},
+	"gitHead": "b5fbb4572f7313e3c80735da1677d33cb82e6e2f"
+}

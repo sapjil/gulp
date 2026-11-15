@@ -1,0 +1,40 @@
+import type { LoaderSync } from 'cosmiconfig';
+import { ConfigLoadError } from './config-load-error.js';
+type CosmiConfig = ReturnType<LoaderSync>;
+/**
+ * Clears the shared explorer's own search and load caches.
+ *
+ * `search()` and `load()` clear them only as a side effect of one call; this lets a caller
+ * clear them up front, before any `search()` or `load()`, so that the calls that follow read the
+ * current file content (see `ConfigProvider#invalidate`, #4415).
+ */
+export declare function clearExplorerCache(): void;
+/**
+ * Searches for a configuration file in the directory of `filePath` and then in each ancestor
+ * directory up to the file system root, and returns the nearest one.
+ *
+ * This walk is done here instead of by cosmiconfig's `searchStrategy: 'project'`, because that
+ * strategy stops at the first directory that has a `package.json`, which hides a configuration
+ * file at a monorepo root from every file inside a package (#4405). The documented behavior is
+ * that the search goes upward from the target file's directory
+ * (https://markuplint.dev/docs/configuration). `searchStrategy: 'global'` is not a fit either: it
+ * also searches the OS-level configuration directory, and that cannot be turned off.
+ *
+ * A `package.json` that has no `markuplint` key is not a configuration file, so the walk
+ * continues past it. There is no upper bound below the file system root, so a configuration file
+ * in a directory outside the project applies when nothing nearer exists.
+ *
+ * @template T - The type of the configuration object
+ * @param filePath - The path of the target file; the search starts from its directory
+ * @param cacheClear - Whether to clear the explorer's caches before searching
+ * @returns The path and content of the nearest configuration file, or `null` if none was found
+ */
+export declare function search<T = CosmiConfig>(filePath: string, cacheClear: boolean): Promise<{
+    filePath: string;
+    config: T;
+} | null>;
+export declare function load<T = CosmiConfig>(filePath: string, cacheClear: boolean, referrer: string): Promise<ConfigLoadError | {
+    filePath: string;
+    config: T;
+}>;
+export {};
